@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi MGMP Bindonesia SMPN 28</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .stimulus-box {
+            background-color: #f8fafc;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin-bottom: 1.25rem;
+            border-radius: 0.375rem;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .illustration-box {
+            border: 2px dashed #94a3b8;
+            background-color: #f1f5f9;
+            padding: 1.25rem;
+            text-align: center;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 flex flex-col">
+
+    <!-- Header App -->
+    <header class="bg-blue-700 text-white shadow-md sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <div>
+                <h1 class="text-lg md:text-xl font-bold">CBT - ASESMEN AKHIR JENJANG</h1>
+                <p class="text-xs md:text-sm text-blue-100">Aplikasi MGMP Bindonesia SMPN 28</p>
+            </div>
+            <div id="timerContainer" class="hidden text-right bg-blue-800 px-3 py-1.5 rounded-lg border border-blue-600">
+                <span class="text-xs block text-blue-200">Sisa Waktu:</span>
+                <span id="timerDisplay" class="font-mono text-base md:text-lg font-bold text-yellow-300">90:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto p-4 flex-1 w-full flex flex-col">
+
+        <!-- 1. FORM LOGIN / REGISTRASI -->
+        <section id="loginSection" class="max-w-md mx-auto my-auto w-full bg-white p-6 md:p-8 rounded-xl shadow-lg border border-slate-200">
+            <h2 class="text-xl font-bold text-center text-slate-800 mb-2">Identitas Peserta Ujian</h2>
+            <p class="text-sm text-slate-500 text-center mb-6">Silakan lengkapi data diri untuk memulai tes.</p>
+
+            <form id="startForm" onsubmit="startExam(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Nama Lengkap Siswa</label>
+                    <input type="text" id="studentName" required placeholder="Ketik nama lengkap..." class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">Kelas</label>
+                    <select id="studentClass" required class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                        <option value="" disabled selected>-- Pilih Kelas (9A - 9J) --</option>
+                        <option value="9A">Kelas 9A</option>
+                        <option value="9B">Kelas 9B</option>
+                        <option value="9C">Kelas 9C</option>
+                        <option value="9D">Kelas 9D</option>
+                        <option value="9E">Kelas 9E</option>
+                        <option value="9F">Kelas 9F</option>
+                        <option value="9G">Kelas 9G</option>
+                        <option value="9H">Kelas 9H</option>
+                        <option value="9I">Kelas 9I</option>
+                        <option value="9J">Kelas 9J</option>
+                    </select>
+                </div>
+
+                <div class="bg-blue-50 p-3 rounded-lg border border-blue-200 mb-6 text-xs text-slate-600">
+                    <p class="font-semibold text-blue-800 mb-1">Petunjuk Teknis:</p>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li>Jumlah soal: 50 butir pilihan ganda.</li>
+                        <li>Durasi waktu pengerjaan: 90 menit.</li>
+                        <li>Pilih salah satu jawaban yang paling tepat.</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 rounded-lg transition-colors shadow">Mulai Ujian</button>
+            </form>
+        </section>
+
+        <!-- 2. EXAM INTERFACE -->
+        <section id="examSection" class="hidden flex-1 grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- Kolom Soal (3 Kolom) -->
+            <div class="lg:col-span-3 bg-white p-6 rounded-xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                <div>
+                    <!-- Header Soal -->
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <span class="text-sm font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full" id="questionNumberBadge">Soal No. 1</span>
+                        <div class="text-xs text-slate-500 font-medium" id="studentInfoBadge">Peserta: - | Kelas: -</div>
+                    </div>
+
+                    <!-- Tempat Stimulus / Teks / Tabel / Gambar -->
+                    <div id="stimulusArea"></div>
+
+                    <!-- Pertanyaan Soal -->
+                    <div id="questionText" class="font-semibold text-slate-800 text-base md:text-lg mb-4"></div>
+
+                    <!-- Pilihan Jawaban -->
+                    <div id="optionsContainer" class="space-y-2.5"></div>
+                </div>
+
+                <!-- Navigasi Bawah -->
+                <div class="flex justify-between items-center pt-6 mt-6 border-t">
+                    <button id="prevBtn" onclick="prevQuestion()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-semibold rounded-lg text-sm transition">Sebelumnya</button>
+                    <div class="flex gap-2">
+                        <button id="nextBtn" onclick="nextQuestion()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg text-sm transition">Selanjutnya</button>
+                        <button id="finishBtn" onclick="confirmFinish()" class="hidden px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold rounded-lg text-sm transition">Selesai Ujian</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Kolom Nomor Soal / Sidebar (1 Kolom) -->
+            <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200 flex flex-col">
+                <h3 class="font-bold text-sm text-slate-700 mb-3 uppercase tracking-wider">Navigasi Soal</h3>
+                <div class="flex items-center gap-4 text-xs mb-3 text-slate-600">
+                    <div class="flex items-center gap-1"><span class="w-3 h-3 bg-blue-600 rounded"></span> Terjawab</div>
+                    <div class="flex items-center gap-1"><span class="w-3 h-3 bg-slate-200 border rounded"></span> Belum</div>
+                </div>
+                <div id="numberGrid" class="grid grid-cols-5 gap-2 overflow-y-auto max-h-96 pr-1"></div>
+            </div>
+        </section>
+
+        <!-- 3. RESULT SECTION -->
+        <section id="resultSection" class="hidden max-w-2xl mx-auto my-auto w-full bg-white p-6 md:p-8 rounded-xl shadow-lg border border-slate-200">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl font-bold">✓</div>
+                <h2 class="text-2xl font-bold text-slate-800">Ujian Telah Selesai</h2>
+                <p class="text-slate-500 text-sm">Berikut adalah rincian hasil evaluasi belajar Anda.</p>
+            </div>
+
+            <div class="bg-slate-50 border rounded-lg p-4 mb-6 space-y-2 text-sm">
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-slate-500">Nama Siswa:</span>
+                    <span id="resName" class="font-semibold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-slate-500">Kelas:</span>
+                    <span id="resClass" class="font-semibold text-slate-800">-</span>
+                </div>
+                <div class="flex justify-between border-b pb-2">
+                    <span class="text-slate-500">Jumlah Jawaban Benar:</span>
+                    <span id="resCorrect" class="font-bold text-emerald-600">0 / 50</span>
+                </div>
+                <div class="flex justify-between pt-1 text-base">
+                    <span class="font-bold text-slate-700">Skor Akhir (Skala 100):</span>
+                    <span id="resScore" class="font-extrabold text-blue-600 text-xl">0</span>
+                </div>
+            </div>
+
+            <div class="flex gap-3">
+                <button onclick="toggleKeyReview()" class="flex-1 bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2.5 rounded-lg text-sm transition">Lihat Kunci & Pembahasan</button>
+                <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2.5 rounded-lg text-sm transition">Ujian Baru</button>
+            </div>
+
+            <!-- Review Kunci Jawaban -->
+            <div id="reviewContainer" class="hidden mt-6 pt-6 border-t space-y-4 max-h-96 overflow-y-auto pr-2">
+                <h4 class="font-bold text-slate-800 text-sm sticky top-0 bg-white py-1">Kunci Jawaban Seluruh Soal:</h4>
+                <div id="reviewList" class="space-y-3 text-xs"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        &copy; 2026 CBT Asesmen Bahasa Indonesia - SMP Negeri. Disusun untuk Latihan TKA Fase D.
+    </footer>
+
+    <!-- LOGIKA JAVASCRIPT & DATABASE SOAL -->
+    <script>
+        // Database 50 Soal Lengkap
+        const examQuestions = [
+            {
+                id: 1,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">PROSES TERJADINYA ANGIN TOPAN</h5>Angin topan merupakan angin kencang yang berputar dengan kecepatan mencapai 120 km/jam atau lebih. Fenomena ini termasuk badai besar yang sangat kuat dan berbahaya. Angin topan biasanya terjadi di wilayah lautan tropis dengan suhu permukaan air yang tinggi.<br><br>Proses terbentuknya angin topan diawali dari suhu laut yang panas. Air laut yang panas akan menguap dalam jumlah besar dan naik ke atmosfer. Uap air tersebut kemudian berkumpul dan membentuk awan tebal jenis kumulonimbus. Di dalam awan ini terjadi perbedaan tekanan udara yang memicu terbentuknya pusaran angin. Pusaran tersebut semakin kuat karena terus mendapat energi dari uap air hangat. Akibatnya, angin berputar semakin cepat dan membentuk topan. Selain itu, angin topan biasanya disertai hujan lebat. Hal ini terjadi karena awan kumulonimbus yang terbentuk mengandung banyak uap air. Ketika uap tersebut mengembun, turunlah hujan deras.<br><br>Saat topan berlangsung, langit menjadi gelap karena tertutup awan tebal. Dampaknya, topan dapat merusak bangunan, menumbangkan pohon, bahkan menerbangkan benda-benda di sekitarnya. Oleh sebab itu, masyarakat perlu waspada saat terjadi angin topan dengan berlindung di tempat aman dan menjauhi benda-benda yang berpotensi membahayakan.<br><span class="text-xs text-slate-400">Sumber: detik.com</span></div>`,
+                q: "Penyebab angin topan sering disertai hujan lebat adalah …",
+                options: [
+                    "Angin darat membawa udara dingin yang memicu turunnya hujan",
+                    "Awan kumulonimbus mengandung uap air yang kemudian mengembun",
+                    "Tekanan udara tinggi menyebabkan awan bergerak ke wilayah daratan",
+                    "Suhu udara rendah membuat air laut tidak dapat menguap kembali"
+                ],
+                answer: 1
+            },
+            {
+                id: 2,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">BAHAYA TERSEMBUNYI DI BALIK SAMPAH PLASTIK YANG DIBAKAR</h5>Membakar sampah plastik di pekarangan rumah sering dianggap solusi cepat untuk menyingkirkan limbah. Namun, di balik bersihnya pekarangan, terdapat bahaya laten yang mengancam kesehatan napas dan lingkungan. Secara ilmiah, plastik yang dibakar melepaskan senyawa beracun yang jauh lebih berbahaya daripada saat plastik tersebut didiamkan.<br><br>Menurut studi, pembakaran sampah plastik, terutama jenis PVC (Polivinil Klorida), melepaskan dioksin dan furan. Senyawa ini bersifat karsinogenik atau memicu kanker. Tidak hanya dampak kebersihan, tetapi sampah yang dibakar juga mencemari udara dengan partikel mikro berbahaya.<br><br>Asap pembakaran plastik juga menghasilkan gas hidrogen klorida yang dapat merusak jaringan paru-paru. Partikel berbahaya ini tidak langsung hilang, melainkan bisa mengendap di tanah dan masuk ke rantai makanan manusia. Oleh karena itu, berhenti membakar sampah plastik adalah langkah krusial. Solusi terbaik adalah memilah dan mendaur ulang. Lingkungan bersih tidak boleh ditukar dengan napas yang beracun.<br><span class="text-xs text-slate-400">Sumber: kompas.com</span></div>`,
+                q: "Manakah pernyataan berikut yang merupakan opini penulis dalam teks tersebut?",
+                options: [
+                    "Plastik yang dibakar melepaskan senyawa beracun berbahaya bagi kesehatan",
+                    "Pembakaran plastik jenis PVC menghasilkan dioksin dan furan beracun",
+                    "Lingkungan bersih tidak boleh ditukar dengan napas yang beracun",
+                    "Asap plastik menghasilkan gas hidrogen klorida yang merusak paru-paru"
+                ],
+                answer: 2
+            },
+            {
+                id: 3,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">CARA MENGIRIM PAKET ANTAR WILAYAH</h5>Paket merupakan barang yang dikirimkan dalam bungkusan melalui pos atau perusahaan ekspedisi. Berikut langkah-langkah yang perlu dilakukan jika kamu ingin mengirim paket.<br>1. Packing barang yang akan dipaketkan dengan rapi dan aman. Jika barang mudah pecah, sebaiknya beri lapisan pelindung ekstra seperti bubble wrap dan tambahkan keterangan barang mudah pecah (fragile).<br>2. Selanjutnya cantumkan informasi penerima dan pengirim, seperti nama lengkap, nomor handphone, alamat lengkap dan kode pos.<br>3. Cek tarif ongkos pengiriman/ongkir pada situs resmi kantor ekspedisi sesuai wilayah dan berat barang, lalu siapkan uang sesuai dengan biaya pengiriman.<br>4. Pergilah ke kantor ekspedisi terdekat. Jangan lupa bawa barang yang sudah di-packing dan uang ongkir sesuai biaya yang tercantum.<br>5. Setelah sampai di kantor ekspedisi, serahkan paket kepada petugas yang ada. Jika ada nomor antrean, maka ambil nomor antrean terlebih dahulu.<br>6. Kemudian data diinput oleh petugas, bayarlah ongkir sesuai nominal yang disebutkan petugas.<br>7. Terima nomor resi dan bukti pengiriman yang diberikan oleh petugas. Nomor resi dapat digunakan untuk melacak keberadaan paket yang dikirim.<br>8. Selanjutnya tunggu hingga proses pengiriman selesai.<br><span class="text-xs text-slate-400">Sumber: brainacademy.id</span></div>`,
+                q: "Pengubahan teks prosedur tersebut ke dalam bentuk narasi yang tepat adalah …",
+                options: [
+                    "Seseorang langsung pergi ke kantor ekspedisi dengan membawa barang, kemudian baru mengemasnya di tempat tersebut dan menanyakan biaya pengiriman sebelum menuliskan alamat penerima paket",
+                    "Seseorang mengemas barang dengan rapi dan aman, menuliskan identitas penerima serta pengirim, mengecek ongkir, lalu datang ke ekspedisi untuk menyerahkan paket dan menerima resi",
+                    "Seseorang hanya mengemas barang seadanya, lalu langsung mengirimkannya tanpa menuliskan alamat lengkap dan tanpa mengecek biaya pengiriman terlebih dahulu",
+                    "Seseorang menunggu barang sampai terlebih dahulu sebelum mengemasnya, kemudian mencatat alamat penerima setelah proses pengiriman selesai dilakukan"
+                ],
+                answer: 1
+            },
+            {
+                id: 4,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">TAHURA JUANDA</h5>Meski terletak tidak jauh dari pusat kota, suasana asri Tahura Juanda cukup dapat membuat siapapun yang berkunjung seolah tengah 'kabur' ke hutan. Tempat ini cocok untuk menjadi tempat healing keluarga, karena sejumlah areanya terbilang aman untuk dikunjungi anak-anak. Detikers pun tidak perlu berjalan jauh-jauh untuk duduk menikmati pemandangan hijau yang rimbun dan sejuk. Di dekat area pintu masuk Tahura Juanda, terdapat deretan kedai makanan yang menyuguhkan pemandangan pohon pinus. Bila ingin suasana yang lebih alami dan menantang, detikers bisa menyusuri jalan hingga Gua Jepang dan Gua Belanda, kandang rusa, ataupun melanjutkan trekking hingga ke Curug Omas, Maribaya.<br><br>Di sepanjang jalan menuju Goa Jepang dan Goa Belanda, pengunjung dapat menikmati sinar matahari hangat yang menerobos pepohonan, ditemani suara 'tonggeret' yang menenangkan. Semakin jauh berjalan, vegetasi tanaman akan semakin rapat dan meneduhkan, namun kemungkinan pohon tumbang terutama di musim hujan perlu diwaspadai.<br><br>Sebelum mencapai Curug Omas, pengunjung juga dapat rehat sejenak sambil berfoto di area jembatan. Bila perut dilanda lapar setelah berjalan sekitar 7 km menuju curug, jangan khawatir. Pasalnya, di sana terdapat sejumlah warung makan yang menyediakan tikar untuk bersantap sambil bersantai.<br><span class="text-xs text-slate-400">Sumber: detik.com</span></div>`,
+                q: "Makna frasa “kabur ke hutan” pada kalimat pertama teks tersebut adalah …",
+                options: [
+                    "Merasakan suasana seolah menjauh dari hiruk pikuk kota dan kehidupan ramai",
+                    "Pergi ke hutan untuk tinggal menetap dan menjauh dari kehidupan perkotaan",
+                    "Melarikan diri secara nyata ke dalam hutan untuk bersembunyi dari orang lain",
+                    "Berpindah tempat ke hutan untuk melakukan kegiatan bertahan hidup di alam"
+                ],
+                answer: 0
+            },
+            {
+                id: 5,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">CERITA FANTASI: NEGERI ELDORIA</h5>Suatu malam, kegelapan mulai menyelimuti negeri Eldoria. Makhluk-makhluk kegelapan muncul dari Hutan Gelap dan menyerang desa-desa di sekitarnya. Ketika desa Kael diserang, ia melihat teman-teman dan keluarganya dalam bahaya. Meski takut, Kael berusaha melindungi mereka, tapi kekuatan makhluk-makhluk itu terlalu besar. Dalam situasi putus asa, Kael mendengar suara bisikan yang memandu dirinya menuju sebuah gua tersembunyi di dalam hutan.<br><br>Dengan mengikuti bisikan tersebut, Kael menemukan sebuah pintu batu raksasa yang tertutup rapat. Di pintu itu terukir sebuah teka-teki kuno. Setelah memecahkan teka-teki tersebut dengan kepintarannya, pintu batu terbuka, dan di dalamnya Kael menemukan Pedang Cahaya. Namun, ketika ia mengambil pedang itu, muncul bayangan hitam yang mengejek Kael dan mengatakan bahwa pedang itu tidak akan berguna karena hati Kael dipenuhi dengan keraguan dan ketakutan.<br><br>Kegelapan mulai menyelimuti ruangan, dan Kael hampir kehilangan harapan. Namun, ia teringat akan teman-teman dan keluarganya yang bergantung padanya. Dengan segenap kekuatan dan keberanian yang tersisa, Kael melawan bayangan hitam tersebut, dan perlahan-lahan, cahaya dari pedang mulai bersinar terang.<br><br>Ketika Kael akhirnya mengatasi rasa takut dan keraguannya, Pedang Cahaya bersinar dengan kekuatan penuh. Cahaya pedang tersebut memusnahkan bayangan hitam dan mengusir kegelapan yang meliputi Eldoria. Kael kembali ke desanya, dan dengan pedang di tangannya, ia berhasil mengalahkan makhluk-makhluk kegelapan yang tersisa, menyelamatkan desanya, dan mengembalikan kedamaian ke seluruh negeri.<br><span class="text-xs text-slate-400">Sumber: ruangguru.com</span></div>`,
+                q: "Pesan moral yang dapat diambil dari keseluruhan cerita tersebut adalah …",
+                options: [
+                    "Seseorang harus menghindari bahaya untuk mempertahankan keselamatan dirinya sendiri",
+                    "Kemenangan dapat diraih dengan bantuan benda ajaib yang memiliki kekuatan luar biasa",
+                    "Ketakutan dan keraguan harus dihindari karena dapat seseorang kehilangan segalanya",
+                    "Keyakinan, keberanian, dan kepedulian terhadap orang lain membawa sebuah keberhasilan"
+                ],
+                answer: 3
+            },
+            {
+                id: 6,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">LAPORAN HASIL OBSERVASI: HUTAN BAKAU</h5>Indonesia memiliki hutan bakau terluas di dunia dengan luas mencapai 4,3 juta hektare menurut Kementerian Lingkungan Hidup. Hutan bakau atau mangrove merupakan bagian dari ekosistem pantai yang tumbuh di wilayah rawa berair payau, tepatnya di garis pantai yang dipengaruhi oleh pasang surut air laut. Karena berada di perbatasan laut dan darat, hutan ini secara berkala tergenang air saat pasang dan kembali kering saat surut, serta mendapat aliran air tawar dari daratan.<br><br>Secara fisik, hutan bakau memiliki ciri khas berupa lingkungan berawa-rawa, terlindung dari gelombang besar, dan memiliki kadar garam payau. Letaknya yang strategis di pantai dan muara sungai membuat ekosistem ini sangat dipengaruhi oleh kondisi laut, terutama pasang surut yang menentukan keberlangsungan hidup vegetasi mangrove.<br><br>Hutan bakau memiliki berbagai manfaat penting. Secara fisik, hutan ini berfungsi menahan abrasi pantai, meredam badai dan angin laut, serta mencegah intrusi air laut ke daratan. Selain itu, mangrove juga mampu menyerap karbon dioksida dan menyaring bahan pencemar di perairan. Dari segi biologi, hutan bakau menjadi habitat berbagai biota laut. Bagi masyarakat, hutan ini juga dimanfaatkan sebagai sumber mata pencaharian dan bahan obat-obatan.<br><span class="text-xs text-slate-400">Sumber: ruangguru.com</span></div>`,
+                q: "Ide pokok paragraf kedua pada teks tersebut adalah …",
+                options: [
+                    "Hutan bakau memiliki ciri berupa lingkungan rawa dengan kadar garam payau",
+                    "Letak hutan bakau berada di daerah pantai dan muara sungai yang strategis",
+                    "Kondisi fisik hutan bakau dipengaruhi oleh kondisi pasang surut air laut",
+                    "Ciri fisik dan kondisi lingkungan hutan bakau yang khas di wilayah pesisir"
+                ],
+                answer: 3
+            },
+            {
+                id: 7,
+                stimulus: `<div class="stimulus-box">Seorang anak yang memiliki kondisi temperamen yang begitu buruk. Lalu ia diberikan sebungkus paku yang dari ayahnya. Ayahnya berkata jika anak tersebut sedang dalam kondisi marah ia harus memukul paku ke pagar.<br><br>Hari pertama ia menancapkan paku sebanyak 37. Namun seiring berjalannya waktu paku yang ia tancapkan ke pagar mulai berkurang. Hingga pada suatu waktu ia berhasil tidak menancapkan paku ke pagar. Keberhasilan yang ia lakukan diceritakan kepada ayahnya. Sang ayahnya mulai memberikan perintah kembali untuk mencabut semua paku yang ia tancapkan di pagar sebelumnya. Lalu ketika anak tersebut telah menyelesaikan tugasnya, ia kembali menceritakan kepada ayahnya.<br><br>Lalu ayahnya mengajaknya keluar untuk melihat pagar tersebut dan berkata “bagus Nak kamu sudah menyelesaikan tugasmu dengan baik. Kamu sudah berhasil menguasai rasa amarahmu juga. Tapi bagaimana dengan pagar tersebut masih tetap ada lubang yang tersisa dari tancapan paku itu?” Tanya sang ayah kepada anak. Lalu ayah tersebut mulai memberikan penjelasan singkat dengan berkata “lubang paku ini seperti amarah yang kau lontarkan kepada orang lain Nak. Mungkin kau berhasil meminta maaf kepadanya dan tak akan mengulanginya. Namun apakah luka yang akan mereka terima bisa dengan cepat sembuh?” Ucap ayah tersebut.<br><span class="text-xs text-slate-400">Sumber: gramedia.com</span></div>`,
+                q: "Bagaimana perubahan karakter tokoh anak dalam cerita tersebut?",
+                options: [
+                    "Ia merasa bersalah melihat pagar yang penuh dengan lubang karena tabiatnya.",
+                    "Ia mampu mengendalikan amarahnya sehingga tidak lagi temperamental.",
+                    "Ia menyadari bahwa meminta maaf tidak cukup untuk menghilangkan sakit hati.",
+                    "Ia menuruti semua perintah ayahnya tanpa mempertanyakan alasan di baliknya."
+                ],
+                answer: 1
+            },
+            {
+                id: 8,
+                stimulus: `<div class="stimulus-box">"Kamu, siswa baru, rupanya pintar, ya?" ejek Indah, ketua kelas. Begitu pula teman-teman yang lainnya mengejek Dita sebagai penyontek ulung. "Aku tidak menyontek, sungguh! Aku mengerjakan sendiri!" Sanggah Dita sembari menekan rasa takut. "Bohong! Buktinya, waktu kamu duduk di belakang itu hasil ulanganmu jelek!" bentak Indah, "Ta ...Tapi.aku tidak rnenyontek," kata Dita hampir menangis. "Sudahlah mana ada pencuri mau mengaku atas perbuatannya," sela Bambang dengan nada mengejek. "Begini saja, kalau kamu memang betul-betul tidak menyontek, nanti kalau ada ulangan lagi, kamu harus duduk di kursi paling belakang sana itu, dan buktikan bahwa kamu pun bisa memperoleh nilai sembilan tanpa Melati!" ujar Indah memberi keputusan.</div>`,
+                q: "Konflik utama yang dialami tokoh Dita dalam kutipan cerita tersebut adalah …",
+                options: [
+                    "Dita merasa kesulitan mengerjakan soal ulangan hingga nilainya tidak memuaskan",
+                    "Dita merasa tidak percaya diri karena harus duduk di bangku paling belakang kelas",
+                    "Dita dituduh menyontek oleh teman-temannya meskipun ia tidak melakukannya",
+                    "Dita berselisih pendapat dengan guru mengenai hasil ulangan yang diperolehnya"
+                ],
+                answer: 2
+            },
+            {
+                id: 9,
+                stimulus: `<div class="stimulus-box">Seekor bangau berjalan dengan langkah yang anggun di sepanjang sebuah sungai kecil, matanya menatap air sungai yang jernih, leher dan paruhnya yang panjang siap untuk menangkap mangsa di air sebagai sarapan paginya.<br>Saat itu, sungai dipenuhi dengan ikan-ikan yang berenang, tetapi sang Bangau merasa sedikit angkuh di pagi hari itu.<br>"Saya tak mau makan ikan-ikan yang kecil," katanya kepada diri sendiri. "Ikan yang kecil tidak pantas dimakan oleh bangau yang anggun seperti saya."<br>Sekarang, seekor ikan yang sedikit lebih besar dari ikan lain, lewat di dekatnya.<br>"Tidak," kata sang Bangau. "Saya tidak akan merepotkan diri saya untuk membuka paruh dan memakan ikan sebesar itu!"<br>Saat matahari mulai meninggi, ikan-ikan yang berada pada air yang dangkal dekat pinggiran sungai, akhirnya berenang pindah ke tengah sungai yang lebih dalam dan dingin. Sang Bangau yang tidak melihat ikan lagi, terpaksa harus puas dengan memakan siput kecil di pinggiran sungai.</div>`,
+                q: "Sifat utama tokoh bangau dalam cerita tersebut adalah …",
+                options: [
+                    "Angkuh karena menolak makanan yang dianggap tidak layak bagi dirinya.",
+                    "Sabar karena menunggu waktu yang tepat untuk mendapatkan makanan terbaiknya",
+                    "Serakah karena mampu menerima semua jenis makanan yang tersedia di sekitarnya.",
+                    "Bijaksana karena mampu memilih makanan yang paling bergizi untuk dirinya."
+                ],
+                answer: 0
+            },
+            {
+                id: 10,
+                stimulus: `<div class="stimulus-box">Aku adalah seekor kancil kecil yang tinggal di hutan rindang dekat sungai jernih. Suatu hari, aku merasa sangat bangga karena berhasil menemukan banyak buah tanpa bantuan siapa pun. “Aku pasti paling cerdik di hutan ini,” pikirku. Kesombonganku membuatku enggan berbagi dengan hewan lain, bahkan ketika si kura-kura yang lapar meminta sedikit makanan. Aku hanya tertawa dan pergi, merasa bahwa semua yang kumiliki adalah hasil usahaku sendiri.<br><br>Namun, keesokan harinya aku terjebak di lumpur saat mencoba mengambil buah di tepi sungai. Aku berusaha keluar, tetapi semakin bergerak, aku justru semakin tenggelam. Dalam kepanikan, aku memanggil bantuan, dan satu-satunya yang datang adalah kura-kura yang kemarin kutolak. Dengan sabar, ia membantuku keluar dari lumpur. Saat itu aku merasa sangat malu. Aku pun meminta maaf dan berjanji tidak akan sombong lagi. Sejak saat itu, aku belajar...</div>`,
+                q: "Sudut pandang yang digunakan dalam dongeng tersebut adalah …",
+                options: [
+                    "Orang pertama yang menceritakan pengalaman dirinya sendiri secara langsung",
+                    "Orang ketiga serba tahu mengetahui seluruh perasaan dan pikiran semua tokoh",
+                    "Orang ketiga terbatas hanya berfokus pada satu tokoh dalam keseluruhan cerita",
+                    "Orang pertama sebagai pengamat hanya melihat kejadian tanpa terlibat langsung"
+                ],
+                answer: 0
+            },
+            {
+                id: 11,
+                stimulus: `<div class="stimulus-box">Pada awal tahun 2025, Pemerintah Kota Bandung melaksanakan berbagai program penataan kota yang berfokus pada pengelolaan sampah dan revitalisasi ruang publik. Salah satu kegiatan yang menonjol adalah gerakan kebersihan massal yang melibatkan warga dari berbagai kecamatan. Kegiatan ini dilakukan secara serentak di sejumlah titik, termasuk taman kota dan kawasan permukiman padat. Selain itu, pemerintah juga memperluas layanan pengangkutan sampah serta mengedukasi masyarakat mengenai pentingnya pemilahan sampah sejak dari rumah.<br><br>Pada pertengahan tahun 2025, Kota Bandung juga menjadi tuan rumah beberapa kegiatan berskala nasional, seperti festival budaya dan pameran ekonomi kreatif. Acara tersebut diikuti oleh pelaku usaha lokal, seniman, serta pengunjung dari berbagai daerah di Indonesia. Kegiatan ini tidak hanya meningkatkan kunjungan wisatawan, tetapi juga mendorong pertumbuhan sektor UMKM di kota tersebut. Melalui berbagai upaya ini, Bandung terus menunjukkan perannya sebagai kota kreatif yang aktif dalam pembangunan berkelanjutan.</div>`,
+                q: "Kalimat yang merupakan fakta dalam teks tersebut adalah …",
+                options: [
+                    "Bandung menunjukkan perannya sebagai kota kreatif yang berkembang pesat",
+                    "Salah satu kegiatan adalah gerakan kebersihan massal di berbagai kecamatan",
+                    "Kegiatan tersebut dinilai sangat bermanfaat bagi seluruh warga kota Bandung",
+                    "Festival budaya itu dianggap paling meriah sepanjang kegiatan berlangsung"
+                ],
+                answer: 1
+            },
+            {
+                id: 12,
+                stimulus: `<div class="stimulus-box"><b>Judul Buku:</b> Sang Pemimpi<br><b>Penulis:</b> Andrea Hirata<br><b>Tebal Buku:</b> 292 halaman<br><b>Penerbit:</b> PT. Bentang Pustaka<br><b>Tahun Terbit:</b> 2008<br><br>Novel Sang Pemimpi karya Andrea Hirata mengisahkan perjuangan tiga remaja Belitung, yaitu Arai, Ikal, dan Jimbron, dalam meraih mimpi di tengah keterbatasan ekonomi. Mereka tetap semangat bersekolah sambil bekerja sebagai kuli ikan, serta menghadapi berbagai tantangan hidup dengan keyakinan, persahabatan, dan kekuatan mimpi.<br><br>Cerita ini memiliki alur yang menarik dan sarat nilai moral serta motivasi. Tokoh-tokohnya kuat dan inspiratif, meskipun terdapat beberapa bahasa kiasan yang mungkin sulit dipahami oleh pembaca pemula. Secara keseluruhan, novel ini mampu menginspirasi pembaca untuk tidak menyerah dalam meraih cita-cita.</div>`,
+                q: "Aspek keunggulan yang paling dominan dalam teks ulasan tersebut adalah …",
+                options: [
+                    "Kekuatan tema yang unik dan belum pernah digunakan sebelumnya",
+                    "Kemampuan penulis dalam menyajikan konflik yang sangat kompleks",
+                    "Penyajian cerita yang inspiratif dengan nilai moral dan motivasi tinggi",
+                    "Penggunaan bahasa ilmiah yang memudahkan pembaca memahami isi"
+                ],
+                answer: 2
+            },
+            {
+                id: 13,
+                stimulus: `<div class="stimulus-box">Pemerintah Kota Bandung menyiagakan 2.266 petugas kebersihan selama periode Lebaran 2026 untuk menjaga kebersihan kota di tengah meningkatnya aktivitas masyarakat. Para petugas disebar di 263 titik pantau, seperti pasar, jalan utama, dan pusat keramaian. Pengelolaan sampah dilakukan dengan skema khusus, termasuk penghentian sementara pengangkutan ke TPA Sarimukti, namun tetap disertai pemantauan intensif. Selain itu, ratusan armada pendukung juga disiapkan guna memastikan penanganan sampah berjalan optimal.<br><br>Wali Kota Muhammad Farhan menekankan pentingnya peran aktif masyarakat dalam mengelola sampah. Ia mengajak warga untuk memilah sampah organik dan nonorganik sejak dari rumah agar pengelolaan lebih efektif. Selain itu, pemerintah juga melakukan pengawasan di titik rawan sampah serta menata pedagang kaki lima demi menjaga ketertiban kota. Oleh karena itu, mari kita bersama-sama menjaga kebersihan lingkungan dengan disiplin membuang dan memilah sampah demi kenyamanan bersama.</div>`,
+                q: "Pernyataan yang menunjukkan kalimat persuasif dalam teks tersebut adalah …",
+                options: [
+                    "Pemerintah Kota Bandung menyiagakan 2.266 petugas kebersihan selama Lebaran",
+                    "Para petugas disebar di 263 titik pantau seperti pasar dan jalan utama",
+                    "Pengelolaan sampah dilakukan dengan skema khusus selama periode Lebaran",
+                    "Mari bersama-sama menjaga kebersihan lingkungan dengan disiplin memilah sampah"
+                ],
+                answer: 3
+            },
+            {
+                id: 14,
+                stimulus: `<div class="stimulus-box">Rendy sejak kecil merupakan kesayangan keluarganya. Dia selalu mendapat dukungan dari keluarganya dalam segala hal. Dia dikenal anak yang selalu ingin menang. Di sekolah dia menggemari sepak bola. Dalam pikirannya banyak akal agar dapat bermain bola. Jika tidak menemukan bola, ia akan membuat bola dari gulungan kaos kaki teman-temannya. Setiap hari Rendy mempunyai ide kreatif agar dapat bermain bola. Rutinitas Rendy terbawa hingga remaja. Akhirnya, di usia remaja ia mendapatkan prestasi yang luar biasa. Bahkan menjadi siswa yang terkenal di sekolahnya.</div>`,
+                q: "Pernyataan yang menunjukkan bahwa cerita tersebut menggunakan sudut pandang orang ketiga adalah …",
+                options: [
+                    "Penulis menggunakan kata aku sebagai pelaku utama dalam cerita",
+                    "Penulis menggunakan kata dia sebagai tokoh yang diceritakan",
+                    "Penulis menggunakan kata kita sebagai bagian dari cerita",
+                    "Penulis menggunakan nama tokoh sebagai pusat dari cerita"
+                ],
+                answer: 1
+            },
+            {
+                id: 15,
+                stimulus: `<div class="stimulus-box"><b>Pada Aksara</b><br><i>Karya Dewi Lestari</i><br>…<br>Aksara …<br>pada aksara kutuangkan kata yang tak terungkapkan<br>karena di hadapanmu kutakut gugur<br>Sapaku tak terlontarkan<br>Menghadirkan tabir dan kata<br>yang siap menjadi takdir menyakitkan karna aksara.<br><br>Aku menyampaikan resah<br>jikalau esok aksaraku membisu<br>dan aku bukan lagi pembaca syairmu<br>biarlah waktu yang menjawab dalam kesenyapannya yang abadi</div>`,
+                q: "Makna kata “gugur” pada larik “karena di hadapanmu kutakut gugur” adalah …",
+                options: [
+                    "jatuh secara fisik ke tanah",
+                    "meninggal dunia",
+                    "kehilangan keberanian atau harapan",
+                    "tersingkir dari perlombaan"
+                ],
+                answer: 2
+            },
+            {
+                id: 16,
+                stimulus: `<div class="stimulus-box font-mono text-xs md:text-sm">PEMERINTAH KOTA BANDUNG<br>SMP NEGERI 85 BANDUNG<br>Jalan Merah Putih Nomor 12, Bandung<br>===============================================================<br>Nomor : 015/OSIS/VI/2026<br>Lampiran : 1 lembar<br>Perihal : undangan kegiatan class meeting<br><br>Yth. Bapak/Ibu Guru SMP Negeri 85 Bandung<br>Di tempat<br><br>Dengan hormat,<br>Sehubungan dengan akan di adakannya kegiatan class meeting yang akan dilaksanakan pada hari selasa, 15 juni 2026, pukul 07.30 WIB s.d selesai. Maka kami mengundang Bapak/Ibu untuk dapat menghadiri sekaligus berpartisipasi dalam kegiatan tersebut.<br><br>Adapun kegiatan yang akan dilaksanakan antara lain: lomba kebersihan kelas, lomba futsal, dan lomba tarik tambang. Peserta di harapkan hadir tepat waktu dan memakai pakaian olahraga.<br><br>Demikian surat ini kami sampaikan, atas perhatiannya kami ucapkan terima kasih.<br><br>Bandung, 10 Juni 2026<br>Ketua Panitia<br>Andi Pratama</div>`,
+                q: "Penggunaan huruf kapital yang tidak tepat terdapat pada bagian surat …",
+                options: [
+                    "hari selasa, 15 juni 2026",
+                    "pukul 07.30 WIB s/d selesai",
+                    "Bapak/Ibu Guru SMPN 85 Bandung",
+                    "Ketua Panitia"
+                ],
+                answer: 0
+            },
+            {
+                id: 17,
+                stimulus: `<div class="stimulus-box">Kupu Rama sudah bersiap di gelanggang pertarungan. Ini adalah masalah harga diri. Dia keluarkan semua kekuatan. Belalai api sudah dibawa. Seluruh panglima dan pasukannya sudah membawa senjata masing-masing.<br><br>"Ini masalah harga diri! Kita harus membela sampai titik darah penghabisan. Mati bersimbah darah atau mati berkalang daun demi daun tumpah darah kita! Hidup negeri Tanam Bunga!" kata Kupu Rama memompa semangat pasukannya.<br><br>Dari kejauhan, terdengar dengung pasukan Wonbah. Mereka terbang dengan memanggul senjata andalan berupa duri runcing, sebuah senjata dengan kekuatan dahsyat. Untung pasukan Kupu Rama sudah mengenakan tameng klorofil untuk meredam senjata itu.<br><br>Ketika mereka sudah semakin dekat dengan pasukan Wonbah, Kupu Rama memberi aba-aba menyerang pada Pasukan Merah. Pasukan Kupu Rama itu bertarung habis-habisan. Hanya tiga wonbah yang tumbang, sementara Kupu Rama kehilangan 30 pasukannya. Wonbah merasa di atas angin. Ia sesumbar dengan lantang.</div>`,
+                q: "Penggunaan kata-kata yang menggambarkan suasana pertempuran untuk menghidupkan cerita terdapat pada …",
+                options: [
+                    "Kupu Rama memberi aba-aba menyerang",
+                    "Mereka terbang dengan memanggul senjata",
+                    "Pasukan Kupu Rama itu bertarung habis-habisan",
+                    "Ia sesumbar dengan lantang"
+                ],
+                answer: 2
+            },
+            {
+                id: 18,
+                stimulus: `<div class="stimulus-box">…Lima detik kemudian mereka terlempar di gerbang sebuah kerajaan. Mereka terkejut karena di hadapannya berdiri seorang ratu yang seluruh tubuhnya dihiasi berlian. "Selamat datang di negeri kami, peramal kerajaan mengatakan bahwa akan datang tiga anak yang akan menyelamatkan putri kami. Saya mempunyai anak yang bernama Candy. Ia tertidur sejak dua tahun yang lalu dikarenakan ia memakai tiga kalung berlian sekaligus," Setetes air mata pun jatuh dari wajah Sang Ratu. "Tolong selamatkan puteriku,"<br><br>"Ta...ta...tapi..." Cika dan Tamika memprotes bersamaan karena mereka berdua membayangkan akan bersenang-senang dalam petualangannya.<br><br>"Cika, Tamika ayo kita tolong Puteri, mereka sedang menghadapi masalah," Anika mantap menjawab sambil menarik dengan paksa kedua tangan sahabatnya yang masih ragu. "Itu puteri Candy!" Anika berlari menuju puteri tempat tidur Candy. Dengan ragu Tamika dan Cika ikut mendekat.<br><br>"Ayo kita ambil sesuai warna!" Anika menjelaskan. "Baik!" Jawab Tamika dan Cika serempak. Setelah itu...</div>`,
+                q: "Penggunaan diksi ”Ta...ta...tapi...” pada cerita tersebut menunjukkan suasana …",
+                options: [
+                    "ragu-ragu",
+                    "percaya diri",
+                    "marah",
+                    "senang"
+                ],
+                answer: 0
+            },
+            {
+                id: 19,
+                stimulus: `<div class="stimulus-box text-center font-serif">………………………………………………………………<br>………………………………………………………………<br>Jangan malas dalam kehidupan,<br>Usaha keras kunci meraih mimpi.</div>`,
+                q: "Isi yang tepat untuk melengkapi bagian sampiran pantun tersebut adalah …",
+                options: [
+                    "Pergi ke pasar membeli roti, / Roti dibeli bersama teman.",
+                    "Burung nuri terbang ke taman, / Hinggap sebentar di pohon jati.",
+                    "Belajar giat setiap hari, / Agar sukses di kemudian hari.",
+                    "Pergi belajar ke Serambi Mekah, / Jangan lupa belanja kudapan."
+                ],
+                answer: 1
+            },
+            {
+                id: 20,
+                stimulus: `<div class="illustration-box"><div class="font-bold text-slate-800 mb-2">INFOGRAFIS KEMENTERIAN KESEHATAN RI</div><div class="text-sm font-semibold text-blue-800">Tren Angka Stunting 2007 - 2021 dan Target 2024:</div><div class="grid grid-cols-6 gap-2 text-xs mt-3 max-w-lg mx-auto bg-white p-3 border rounded"><div class="border-r"><b>2007</b><br>37%</div><div class="border-r"><b>2010</b><br>36%</div><div class="border-r"><b>2013</b><br>37%</div><div class="border-r"><b>2016</b><br>34%</div><div class="border-r"><b>2018</b><br>31%</div><div><b>2019</b><br>28%</div></div><div class="grid grid-cols-4 gap-2 text-xs mt-2 max-w-md mx-auto bg-emerald-50 p-2 border border-emerald-300 rounded font-semibold text-emerald-800"><div><b>2021</b><br>24.4%</div><div><b>2022 (T)</b><br>21%</div><div><b>2023 (T)</b><br>17%</div><div><b>2024 (T)</b><br>14%</div></div><p class="text-xs text-slate-500 mt-2">*Target penurunan rata-rata konsisten: 3,5% per tahun</p></div>`,
+                q: "Berdasarkan grafik, pada tahun berapakah angka stunting mengalami penurunan paling besar dibandingkan tahun sebelumnya?",
+                options: [
+                    "2010",
+                    "2018",
+                    "2019",
+                    "2021"
+                ],
+                answer: 3
+            },
+            {
+                id: 21,
+                stimulus: `<div class="stimulus-box font-serif"><h5 class="font-bold text-center not-italic mb-2 font-sans text-blue-800">CAKRAWALA NUSANTARA</h5>Indonesia adalah jiwa berwarna-warni,<br>Di kelilingi pulau-pulau permata berharga<br>Berbagai budaya adalah harta tak ternilai<br>Menyatu di muara yang disebut Pancasila.<br><br>Bahasa beragam bak jembatan penyatu rasa<br>Menghubungkan hati dari Sabang sampai Merauke,<br>Kita adalah daun-daun di pohon besar Nusantara<br>Berakar kuat pada tanah pertiwi yang sama.<br><br>Kebhinekaan laksana tenunan emas,<br>Merajut ribuan corak dalam satu kain bersahaja<br>Di bawah naungannya kita berteduh bersama,<br>Meski berbeda, kita satu dalam cinta tanah pusaka</div>`,
+                q: "Penggambaran perasaan penyair terhadap Indonesia dalam larik “Indonesia adalah jiwa berwarna-warni” paling tepat dinilai sebagai …",
+                options: [
+                    "Perasaan bahagia terhadap keragaman nusabangsa",
+                    "Perasaan bangga terhadap keberagaman Indonesia",
+                    "Perasaan takut terhadap perbedaan budaya bangsa",
+                    "Perasaan ragu terhadap persatuan bangsa Indonesia"
+                ],
+                answer: 1
+            },
+            {
+                id: 22,
+                stimulus: `<div class="stimulus-box">Sejatinya pro dan kontra ujian nasional maupun penyelenggaraan kembali Tes Kemampuan Akademik (TKA) jika disadari lebih dalam, berakar pada perbedaan pandangan tentang cara terbaik mengukur kualitas pendidikan.<br><br>Mereka yang setuju, melihat TKA sebagai alat ukur objektif yang mampu memetakan kemampuan akademik siswa secara merata di seluruh Indonesia, sekaligus mempersiapkan mereka menghadapi seleksi sekolah unggulan dan perguruan tinggi. Data dari TKA dapat menjadi dasar perbaikan kurikulum, pemerataan kualitas guru, dan kebijakan afirmasi bagi daerah tertinggal. Latihan sejak dini juga dianggap akan membentuk mental tangguh dan strategi belajar yang dibutuhkan di era persaingan global.<br><br>Sebaliknya, mereka yang tidak setuju, merasa khawatir TKA akan mempersempit makna pendidikan menjadi sekadar perolehan nilai, memicu praktik teaching to the test, dan menambah tekanan berlebihan pada siswa. Kesenjangan akses teknologi dan fasilitas di daerah juga berpotensi membuat hasil tes tidak mencerminkan kemampuan secara adil.<br><span class="text-xs text-slate-400">Sumber: antaranews.com</span></div>`,
+                q: "Kalimat yang menunjukkan sikap tidak setuju terhadap TKA dalam teks adalah …",
+                options: [
+                    "Latihan sejak dini membentuk mental kuat dan tangguh siswa.",
+                    "TKA membantu pemerataan kualitas Pendidikan di Indonesia.",
+                    "Kesenjangan akses teknologi dapat membuat hasil tes tidak adil.",
+                    "TKA menjadi alat ukur objektif kedisiplinan kemampuan siswa."
+                ],
+                answer: 2
+            },
+            {
+                id: 23,
+                stimulus: `<div class="illustration-box"><div class="font-bold text-slate-800 mb-1">POSTER: HEMATLAH AIR (HARI AIR SEDUNIA)</div><div class="p-3 bg-sky-50 border border-sky-200 rounded text-xs text-slate-700 max-w-md mx-auto mb-2">[Gambar Ilustrasi: Globe / Bola Bumi yang meneteskan air melalui sebuah keran air ke genangan di bawahnya]</div><p class="text-xs text-slate-600 italic">"Air adalah sumber daya alam yang tidak ternilai harganya, pergunakan air dengan bijak, matikan keran air saat tidak digunakan, selalu menjaga kelestarian sumber daya air."</p></div>`,
+                q: "Makna tersirat dari gambar bumi yang mengeluarkan air dari keran dalam iklan tersebut adalah …",
+                options: [
+                    "Ketersediaan air bergantung pada perilaku manusia dalam mengelolanya",
+                    "Air merupakan sumber daya yang selalu tersedia tanpa batas bagi manusia",
+                    "Bumi secara alami mampu menghasilkan air tanpa campur tangan manusia",
+                    "Air hanya dapat dimanfaatkan manusia melalui penggunaan alat tertentu"
+                ],
+                answer: 0
+            },
+            {
+                id: 24,
+                stimulus: `<div class="illustration-box"><div class="font-bold text-slate-800 text-base mb-1">POSTER: JAGALAH KEBERSIHAN LINGKUNGAN</div><div class="text-xs text-slate-600 mb-2">"Kebersihan mencerminkan kepedulian dan tanggung jawab kita terhadap kesehatan dan kesejahteraan bersama"</div><div class="flex justify-center gap-3 my-2 text-xs font-semibold"><span class="px-3 py-2 bg-green-200 rounded border border-green-400">Tong Hijau (Organik)</span><span class="px-3 py-2 bg-yellow-200 rounded border border-yellow-400">Tong Kuning (Anorganik)</span><span class="px-3 py-2 bg-red-200 rounded border border-red-400">Tong Merah (B3)</span></div></div>`,
+                q: "Berdasarkan keseluruhan isi poster, tujuan utama penyampaian informasi tersebut adalah …",
+                options: [
+                    "Memberikan informasi tentang jenis-jenis tempat sampah yang digunakan di lingkungan",
+                    "Menjelaskan manfaat bunga sebagai hiasan dalam memperindah lingkungan masyarakat",
+                    "Menyampaikan bahwa kebersihan lingkungan hanya penting bagi kelompok tertentu saja",
+                    "Mengajak masyarakat menjaga kebersihan lingkungan demi kesehatan dan kebersihan"
+                ],
+                answer: 3
+            },
+            {
+                id: 25,
+                stimulus: `<div class="stimulus-box overflow-x-auto"><table class="w-full text-left text-xs border border-slate-300"><tr class="bg-slate-200"><th class="border p-2">No</th><th class="border p-2">Slogan</th></tr><tr><td class="border p-2 font-bold">1</td><td class="border p-2">Jaga bumi kita agar tetap hijau dan lestari selalu</td></tr><tr><td class="border p-2 font-bold">2</td><td class="border p-2">Lindungi alam ini demi kehidupan yang lebih baik nanti</td></tr><tr><td class="border p-2 font-bold">3</td><td class="border p-2">Rawat lingkungan hidup untuk masa depan yang cerah nanti</td></tr><tr><td class="border p-2 font-bold">4</td><td class="border p-2">Bumi lestari hidup berseri untuk generasi masa depan</td></tr></table></div>`,
+                q: "Slogan yang paling sesuai untuk menjaga bumi terdapat pada nomor …",
+                options: [
+                    "1",
+                    "2",
+                    "3",
+                    "4"
+                ],
+                answer: 3
+            },
+            {
+                id: 26,
+                stimulus: `<div class="stimulus-box font-serif"><h5 class="font-bold text-center not-italic mb-2 font-sans text-blue-800">HUJAN BULAN JUNI</h5><i>Karya: Sapardi Djoko Damono (1989)</i><br><br>tak ada yang lebih tabah<br>dari hujan bulan juni<br>dirahasiakannya rintik rindunya<br>kepada pohon berbunga itu<br><br>tak ada yang lebih bijak<br>dari hujan bulan juni<br>dihapusnya jejak-jejak kakinya<br>yang ragu-ragu di jalan itu<br><br>tak ada yang lebih arif<br>dari hujan bulan juni<br>dibiarkannya yang tak terucapkan<br>diserap akar pohon bunga itu</div>`,
+                q: "Majas yang dominan digunakan dalam puisi tersebut adalah …",
+                options: [
+                    "majas hiperbola",
+                    "majas personifikasi",
+                    "majas metafora",
+                    "majas repetisi"
+                ],
+                answer: 1
+            },
+            {
+                id: 27,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">HARRY POTTER AND THE SORCERER'S STONE</h5><i>Karya : J.K. Rowling</i><br><br>Harry melangkah perlahan di lorong kastil Hogwarts yang panjang dan sunyi. Dinding batu itu terasa dingin, seolah menyimpan ribuan rahasia yang belum terungkap. Di kejauhan, cahaya obor menari-nari seperti makhluk hidup yang berbisik pelan. Harry merasakan dadanya berdebar, bukan hanya karena takut, tetapi juga karena rasa penasaran yang membakar semangatnya.<br><br>Ia teringat pesan Hagrid bahwa tidak semua yang tampak berbahaya benar-benar jahat, dan tidak semua yang terlihat indah membawa kebaikan. Pikiran itu membuatnya semakin waspada. Saat ia melangkah lebih jauh, bayangan di dinding tampak bergerak mengikuti langkahnya, seperti teman yang setia namun misterius.<br><br>Tiba-tiba, sebuah pintu tua di ujung lorong terbuka perlahan, suaranya berderit panjang, memecah keheningan malam. Harry menarik napas dalam-dalam. Ia tahu, di balik pintu itu mungkin tersimpan jawaban yang selama ini ia cari atau justru bahaya yang siap menerkam. Namun, keberaniannya telah tumbuh, ia tidak lagi anak yang mudah gentar. Dengan tekad yang kuat, ia melangkah maju, menembus ketidakpastian yang menyelimuti masa depannya.</div>`,
+                q: "Kalimat yang mengandung makna konotasi dalam kutipan terdapat pada …",
+                options: [
+                    "Paragraf pertama kalimat pertama",
+                    "Paragraf pertama kalimat kedua",
+                    "Paragraf kedua kalimat pertama",
+                    "Paragraf ketiga kalimat keempat"
+                ],
+                answer: 1
+            },
+            {
+                id: 28,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">SEMUT DAN MERPATI</h5>Ada semut yang akan minum air di sisi sungai. Saat merayap ke bawah, dia tersandung, Pluk jatuh kedalam air. Untungnya airnya tidak terlalu dalam sebelah sana, tetapi tetap ia tak bisa berenang. Sang semut pun berteriak, “Tolong, tolong, saya akan tenggelam, tolong..!” Kebetulan ada merpati yang sedang terbang di sekitarnya dan mendengar semut memanggil meminta tolong. Saat melihat ke bawah, terlihat semut tampak kejang-kejang. Karena kasihan, merpati terbang sambil menggigit selembar daun. Lalu disodorkannya daun itu di depan semut. Usai daun itu dipegang erat oleh si semut, merpati membawanya ke darat. Semut amat berterimakasih kepada merpati yang telah melepaskannya dari bahaya.<br><br>Pada suatu hari merpati sedang melirik-lirik ke dalam sebuah cabang kayu yang menyodor di atas air sungai. Semut yang dahulu diselamatkannya juga kebetulan ada di bawah pohon. Dari kejauhan ada pemburu yang mendatangi dengan berjalan pelan-pelan. Tanpa menunggu lama semut langsung mendatangi merpati dan berbisik, “Hei, merpati, cepat terbang, ada pemburu yang mulai memompa tembakannya." Segeralah sang merpati terbang tinggi. Paginya si merpati kembali bertemu dengan si semut. Merpati berkata, "Terima kasih sekali, semut, sudah menolongku bebas dari musibah.” Jawab semut: “Menolong orang lain yang akan celaka itu memang kewajiban kita semua. Apalagi aku sekarang masih hidup berkat pertolonganmu."</div>`,
+                q: "Bagian teks yang menunjukkan resolusi dalam dongeng tersebut adalah …",
+                options: [
+                    "Semut terjatuh ke dalam sungai saat hendak minum dan tidak mampu menyelamatkan dirinya dari arus air.",
+                    "Merpati menolong semut dengan memberikan daun agar semut dapat naik dan terbebas dari bahaya tenggelam.",
+                    "Semut memperingatkan merpati tentang datangnya pemburu sehingga merpati dapat segera terbang menyelamatkan diri.",
+                    "Semut dan merpati saling membantu dalam situasi berbeda sehingga keduanya terhindar dari bahaya yang mengancam."
+                ],
+                answer: 2
+            },
+            {
+                id: 29,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">DAMPAK PENGGUNAAN TEKNOLOGI TERBARU : BLOCKCHAIN</h5>Uang digital saat menjadi era baru dalam penggunaan aktivitas jual beli di seluruh dunia. Beberapa tahun belakangan ini hangat dibahas cryptocurrency dan blockchain. Blockchain adalah sistem penyimpanan atau bank data secara digital yang terhubung dengan kriptografi. Hadirnya bank data ini, menjadikan masyarakat sudah tidak takut lagi untuk menyimpan uangnya secara lebih aman. Di tengah kasus hacker yang meningkat serta pencurian data, penggunaan blockchain sebagai bank data dirasa sudah tepat dan aman. Blockchain ini memberikan dampak positif pada bidang keuangan terutama uang digital. Kemudahan dalam bertransaksi serta keamanan tingkat tinggi, menjadi daya tarik utama dari blockchain ini.<br><br>Kehadiran blockchain saat ini menjadi keraguan tersendiri bagi masyarakat. Di tengah banyaknya jual beli data serta cyber security yang masih buruk, akan memberi rasa bimbang masyarakat untuk menggunakan blockchain...</div>`,
+                q: "Pendapat yang menunjukkan pro dan sesuai dengan isi teks adalah …",
+                options: [
+                    "Penggunaan blockchain mampu mempercepat transaksi internasional secara signifikan dan mengurangi biaya operasional perbankan secara menyeluruh.",
+                    "Teknologi blockchain memberikan rasa aman dalam penyimpanan data dan aset karena sistemnya yang canggih dan terintegrasi.",
+                    "Blockchain merupakan teknologi modern yang dapat menggantikan seluruh sistem keuangan konvensional dalam waktu dekat.",
+                    "Penggunaan blockchain akan menjamin keamanan data secara mutlak tanpa risiko kebocoran informasi di masa mendatang."
+                ],
+                answer: 1
+            },
+            {
+                id: 30,
+                stimulus: `<div class="stimulus-box text-xs md:text-sm"><b>Informasi Buku:</b><br>• Judul buku : Laskar Pelangi<br>• Penulis : Andrea Hirata<br>• Penerbit : Bentang Pustaka<br>• Kota terbit : Yogyakarta<br>• Tahun terbit : 2005</div>`,
+                q: "Penulisan daftar pustaka yang tepat berdasarkan informasi tersebut adalah …",
+                options: [
+                    "Hirata, Andrea. 2005. Laskar Pelangi. Yogyakarta : Bentang Pustaka.",
+                    "Hirata, Andrea. 2005. Laskar Pelangi. Yogyakarta : Bentang Pustaka",
+                    "Hirata, Andrea. Laskar Pelangi. 2005. Bentang Pustaka : Yogyakarta.",
+                    "Hirata, Andrea. 2005. Laskar Pelangi. Bentang Pustaka : Yogyakarta."
+                ],
+                answer: 0
+            },
+            {
+                id: 31,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">TERJADINYA PELANGI</h5>Pelangi merupakan salah satu pemandangan indah berbentuk busur yang sering muncul karena pembiasan sinar matahari ketika hujan. Umumnya, fenomena alam ini dapat terlihat di daerah pegunungan, ketika mendung, atau ketika hujan baru berhenti.<br><br>Pelangi terdiri atas beberapa spektrum warna. Warna-warna yang terlihat meliputi merah, kuning, hijau, biru, jingga, dan ungu. Di dalam spektrum, garis merah selalu berada pada salah satu ujung, sedangkan biru serta ungu di sisi lain. Hal ini ditentukan berdasarkan perbedaan panjang gelombang pada warna-warna tersebut.<br><br>Pelangi hanya dapat dilihat saat hujan bersamaan dengan matahari yang bersinar, tetapi dari sisi yang berlawanan dengan pengamat. Posisi kita harus berada di antara matahari dan tetesan air dengan matahari di belakang kita. Matahari, mata, dan pusat busur pelangi harus berada dalam satu garis lurus.</div>`,
+                q: "Hubungan sebab-akibat yang sesuai dengan isi teks adalah …",
+                options: [
+                    "Pelangi terlihat berwarna-warni karena cahaya matahari terhalang oleh awan sehingga membentuk spektrum warna.",
+                    "Pelangi hanya dapat diamati di daerah pegunungan karena kondisi udara di wilayah tersebut mendukung terbentuknya pelangi.",
+                    "Warna pelangi muncul karena perbedaan posisi pengamat terhadap matahari tanpa melibatkan proses pembiasan cahaya.",
+                    "Pelangi dapat terlihat ketika hujan terjadi bersamaan dengan matahari bersinar dari arah yang berlawanan dengan pengamat."
+                ],
+                answer: 3
+            },
+            {
+                id: 32,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">KEMENANGAN TIM NASIONAL SEPAK BOLA INDONESIA</h5>Tim nasional sepak bola Indonesia mencatat kemenangan telak dalam pertandingan persahabatan melawan Timnas Malaysia di Stadion Utama Gelora Bung Karno, Jakarta. Pertandingan yang berlangsung pada Minggu malam ini berakhir dengan skor akhir 4-0 untuk tim tuan rumah.<br><br>Timnas Indonesia tampil dominan sepanjang pertandingan dengan mengendalikan permainan dan menciptakan sejumlah peluang. Gol pertama diciptakan oleh striker Andika Pratama pada menit ke-20 setelah menerima <b>umpan terobosan</b> yang cerdik dari gelandang Andika Wijaya. Gol kedua datang dari tendangan penalti yang dieksekusi dengan sempurna oleh kapten tim, Evan Dimas, di menit ke-35...</div>`,
+                q: "Makna kata \"umpan terobosan\" dalam kutipan teks tersebut adalah …",
+                options: [
+                    "operan bola yang dilakukan dengan cara mengirimkan bola ke ruang kosong di antara pemain lawan untuk membuka kesempatan menyerang",
+                    "operan bola yang dilakukan dengan cara mengalirkan bola secara perlahan antar pemain untuk menjaga penguasaan permainan",
+                    "operan bola yang dilakukan dengan cara mengirimkan bola ke sisi lapangan untuk memperluas area serangan tim",
+                    "operan bola yang dilakukan dengan cara memberikan bola ke pemain terdekat untuk menghindari tekanan dari lawan"
+                ],
+                answer: 0
+            },
+            {
+                id: 33,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">PENGALAMAN NAIK KERETA</h5>Saat itu di pertengahan Oktober, aku melakukan perjalanan yang cukup panjang dari Jakarta ke Malang. Aku pergi bersama dengan seorang teman. Kami memulai perjalanan menggunakan kereta dari Stasiun Pasar Senen, Jakarta. Perjalanan yang kami tempuh memakan waktu sekitar 17 jam.<br><br>Di dalam kereta, suasana sangat ramai, namun tetap tertib. Bangku yang kami pilih dapat memuat empat orang yang saling berhadapan. Bangku ini terbuat dari besi yang dilapisi sedikit busa. Kami duduk saling berhadapan dengan penumpang lain. Meskipun tidak saling mengenal, namun seiring berjalannya waktu, kami saling sapa dan mengobrol selama perjalanan.<br><br>Suasana di kereta sangat tenang. Apalagi saat hujan di luar turun dan membekaskan embun pada kaca. Ditambah lantunan lagu Jawa yang sendu dan merayu mata, seakan memanjakan untuk tidur. Ketika waktu beranjak gelap, suasana kereta tampak hening karena penumpang mulai terlelap. Pengalaman dalam perjalanan di kereta sangat menyenangkan dan aku ingin mengulanginya kembali.</div>`,
+                q: "Pesan tersirat yang dapat diambil dari kutipan teks tersebut adalah …",
+                options: [
+                    "setiap perjalanan panjang akan terasa menyenangkan apabila diisi dengan percakapan yang dilakukan secara terus-menerus",
+                    "suasana perjalanan yang ramai mendorong setiap penumpang untuk saling berbicara tanpa mempertimbangkan hubungan sebelumnya",
+                    "keterbukaan untuk berinteraksi dengan orang yang belum dikenal dapat menumbuhkan kedekatan dan kenyamanan selama perjalanan",
+                    "komunikasi dalam perjalanan merupakan hal yang harus dilakukan oleh semua penumpang agar tidak merasakan kejenuhan"
+                ],
+                answer: 2
+            },
+            {
+                id: 34,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">PENERAPAN AI PADA INDUSTRI STARTUP</h5><b>(P1)</b> Peranan AI (Artificial Intelegent) telah merambah di berbagai lini kehidupan...<br><b>(P2)</b> Lebih jauh lagi, AI memudahkan penciptaan solusi energi terbarukan dengan memberi para pengusaha sumber daya...<br><b>(P3)</b> Perusahaan rintisan yang mengadopsi metode AI yang etis dan bertanggung jawab tidak hanya membantu melestarikan lingkungan tetapi juga menumbuhkan kepercayaan di antara para pemangku kepentingan. Alat yang sejalan dengan praktik manajemen yang mapan seperti sistem manajemen lingkungan, manajemen rantai pasokan, analisis risiko, manajemen keberlanjutan, serta pelatihan dan pendidikan adalah yang paling berguna bagi perusahaan kecil (Halberstadt et al., 2014).<br><b>(P4)</b> Kemampuan komunikasi digital masih banyak yang perlu ditingkatkan... (Torres-Mancera et al., 2023).<br><b>(P5)</b> Kesimpulannya, kecerdasan buatan (AI) telah menjadi alat penting bagi start-up...</div>`,
+                q: "Berdasarkan teks “Penerapan AI pada Industri Startup” kalimat fakta terdapat pada paragraf ke …",
+                options: [
+                    "Paragraf 2",
+                    "Paragraf 3",
+                    "Paragraf 4",
+                    "Paragraf 5"
+                ],
+                answer: 1
+            },
+            {
+                id: 35,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">DIABETES DAN HIPERTENSI PADA PASIEN GIGI</h5>Peningkatan insiden penyakit kronis seperti diabetes melitus tipe 2 (T2DM) dan hipertensi (HTN) menjadi tantangan besar bagi sistem kesehatan global. Kedua penyakit ini tidak hanya merusak kesehatan secara umum tetapi juga berdampak serius pada kesehatan mulut.<br><br>Penelitian terbaru menunjukkan bahwa ada hubungan erat antara T2DM, HTN, dan kesehatan gigi, khususnya dalam konteks terapi endodontik, yaitu perawatan saluran akar. Pasien dengan diabetes tipe 2 dan hipertensi sering memerlukan terapi endodontik. Pasien dengan T2DM yang tidak terkontrol memiliki risiko lebih tinggi mengalami kegagalan endodontik dan penyembuhan yang tidak optimal. Selain itu, kondisi gigi yang buruk dapat mempengaruhi kontrol glukosa dan memperburuk hipertensi.<br><br>Penelitian ini bertujuan untuk menutup kesenjangan pengetahuan tersebut dengan meneliti prevalensi T2DM dan HTN di antara pasien yang mencari perawatan gigi...</div>`,
+                q: "Topik utama yang dibahas dalam teks tersebut adalah …",
+                options: [
+                    "peningkatan jumlah penderita diabetes tipe 2 dan hipertensi di Indonesia serta dampaknya terhadap sistem kesehatan nasional",
+                    "hubungan antara diabetes tipe 2, hipertensi, dan kondisi kesehatan gigi dalam kaitannya dengan perawatan endodontik pasien",
+                    "pentingnya pengendalian penyakit kronis seperti diabetes dan hipertensi untuk mencegah komplikasi pada organ tubuh manusia",
+                    "upaya penelitian dalam mengembangkan program perawatan kesehatan yang lebih efektif bagi pasien dengan penyakit kronis"
+                ],
+                answer: 1
+            },
+            {
+                id: 36,
+                stimulus: `<div class="stimulus-box overflow-x-auto"><table class="w-full text-xs border border-slate-300"><tr class="bg-slate-100 font-bold"><th class="border p-2 w-1/2">Teks 1</th><th class="border p-2 w-1/2">Teks 2</th></tr><tr><td class="border p-2 align-top">Penggunaan gawai di kalangan masyarakat mengalami peningkatan yang cukup signifikan. Cahaya biru memiliki panjang gelombang pendek yang memungkinkan penetrasi langsung ke retina mata. Sejumlah penelitian menunjukkan paparan jangka panjang menyebabkan kelelahan mata dan mengganggu siklus tidur. Para ahli menyarankan aturan 20-20-20.</td><td class="border p-2 align-top">Kebiasaan menggunakan gawai lama menimbulkan keluhan pada remaja. Seorang siswa, Raka (16), mengaku sering mengalami mata perih dan sakit kepala: "Kalau sudah terlalu lama menatap layar, mata terasa lelah dan sulit tidur," ujarnya. Dokter spesialis mata menjelaskan bahwa cahaya biru memengaruhi retina dan menyarankan pembatasan durasi.</td></tr></table></div>`,
+                q: "Perbedaan teknik penyampaian informasi pada kedua teks tersebut adalah …",
+                options: [
+                    "teks pertama menyajikan informasi objektif dengan penjelasan ilmiah, sedangkan teks kedua menyajikan informasi melalui contoh kasus dan pendapat narasumber",
+                    "teks pertama menyampaikan informasi dengan menggunakan ilustrasi pengalaman individu, sedangkan teks kedua menyampaikan data secara umum dan konseptual",
+                    "teks pertama berfokus pada pendapat narasumber, sedangkan teks kedua menekankan pada paparan teori dan konsep ilmiah secara sistematis",
+                    "teks pertama menggunakan sudut pandang subjektif penulis, sedangkan teks kedua menggunakan pendekatan deskriptif berbasis data penelitian"
+                ],
+                answer: 0
+            },
+            {
+                id: 37,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">SURAT PEMBACA: KELUHAN PENGGUNAAN GAWAI DI SEKOLAH</h5>Saya merasa penggunaan gawai di sekolah saat ini sudah sangat berlebihan. Hampir semua siswa membawa ponsel dan menggunakannya tidak hanya untuk belajar, tetapi juga untuk bermain gim dan membuka media sosial saat jam pelajaran berlangsung. Hal ini tentu mengganggu konsentrasi belajar dan menurunkan prestasi siswa.<br><br>Menurut saya, penggunaan gawai seharusnya dilarang sepenuhnya di lingkungan sekolah. Banyak siswa menjadi malas belajar karena terlalu bergantung pada internet untuk mencari jawaban. Selain itu, penggunaan gawai juga dapat merusak kesehatan, terutama mata, karena radiasi yang dihasilkan sangat berbahaya.<br><br>Saya berharap pihak sekolah dapat segera mengambil tindakan tegas dengan melarang penggunaan gawai agar suasana belajar menjadi lebih kondusif dan siswa dapat kembali fokus pada pembelajaran.</div>`,
+                q: "Kualitas argumen dalam surat pembaca tersebut dapat dinilai sebagai …",
+                options: [
+                    "kuat karena seluruh pernyataan didukung oleh data yang jelas serta menunjukkan hubungan sebab-akibat yang logis",
+                    "cukup kuat karena memuat pendapat yang relevan, tetapi belum didukung oleh data atau bukti yang memadai",
+                    "lemah karena argumen yang disampaikan tidak berkaitan dengan permasalahan penggunaan gawai di sekolah",
+                    "sangat kuat karena menggunakan bahasa yang meyakinkan dan mampu memengaruhi pembaca secara emosional"
+                ],
+                answer: 1
+            },
+            {
+                id: 38,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">PENGGUNAAN GAWAI DALAM PEMBELAJARAN DI SEKOLAH</h5>Penggunaan gawai dalam pembelajaran di sekolah menjadi topik yang terus diperbincangkan. Sebagian pihak berpendapat bahwa gawai memberikan banyak manfaat bagi siswa dalam mengakses referensi dan materi digital.<br><br>Di sisi lain, penggunaan gawai dalam pembelajaran juga menimbulkan berbagai kekhawatiran. Tidak semua siswa mampu menggunakan gawai secara bijak, sehingga sering kali mereka justru terdistraksi oleh aplikasi lain seperti media sosial dan permainan daring. Hal ini tentu dapat mengganggu konsentrasi dan menurunkan efektivitas pembelajaran di kelas. Ketergantungan terhadap gawai juga dikhawatirkan mengurangi kemampuan berpikir kritis.<br><br>Oleh karena itu, diperlukan kebijakan yang tepat dalam penggunaan gawai di sekolah agar manfaatnya optimal.</div>`,
+                q: "Kalimat yang merupakan kontra dalam teks tersebut adalah …",
+                options: [
+                    "Penggunaan gawai memberikan kemudahan bagi siswa dalam mengakses berbagai sumber belajar yang lebih luas dan interaktif",
+                    "Penggunaan gawai dianggap mampu meningkatkan motivasi belajar siswa karena pembelajaran menjadi lebih menarik dan variatif",
+                    "Penggunaan gawai dalam pembelajaran menimbulkan kekhawatiran karena siswa sering terdistraksi oleh media sosial dan permainan daring",
+                    "Penggunaan gawai memungkinkan siswa mengikuti kegiatan pembelajaran yang lebih modern dan berbasis teknologi digital"
+                ],
+                answer: 2
+            },
+            {
+                id: 39,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">ULASAN LAGU “HATI-HATI DI JALAN”</h5>Lagu “Hati-Hati di Jalan” yang dipopulerkan oleh Tulus menghadirkan nuansa melankolis yang kuat melalui lirik yang sederhana namun penuh makna. Lagu ini menceritakan tentang perpisahan dua insan yang harus menerima kenyataan bahwa mereka tidak dapat bersama, meskipun saling mencintai. Melalui pilihan kata yang puitis, pendengar diajak untuk merasakan kesedihan yang mendalam.<br><br>Selain itu, aransemen musik yang lembut dan penggunaan instrumen yang minimalis semakin memperkuat suasana emosional dalam lagu ini. Namun, bagi sebagian pendengar, tempo lagu yang cenderung lambat dapat terasa monoton dan kurang memberikan variasi dinamika. Hal ini membuat lagu terasa kurang menarik bagi mereka yang menyukai musik dengan ritme yang lebih cepat dan energik.</div>`,
+                q: "Bagian yang merupakan evaluasi dalam teks ulasan tersebut adalah …",
+                options: [
+                    "Lagu “Hati-Hati di Jalan” menghadirkan nuansa melankolis melalui lirik yang sederhana dan penuh makna",
+                    "Lagu ini menceritakan tentang perpisahan dua insan yang tidak dapat bersatu meskipun saling mencintai",
+                    "Tempo lagu yang cenderung lambat dapat terasa monoton dan kurang memberikan variasi dinamika",
+                    "Lagu ini mampu menyampaikan pesan emosional yang kuat kepada para pendengarnya"
+                ],
+                answer: 2
+            },
+            {
+                id: 40,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">LHO: SAMPAH PLASTIK DI LINGKUNGAN SEKOLAH</h5>Sampah plastik merupakan salah satu jenis limbah yang paling banyak ditemukan di lingkungan sekolah. Sifat plastik yang sulit terurai menjadikannya sebagai masalah lingkungan yang serius. Plastik membutuhkan waktu puluhan hingga ratusan tahun untuk terurai secara alami. Akibatnya, penumpukan sampah plastik dapat mencemari tanah dan air serta mengganggu keseimbangan ekosistem di sekitar sekolah. Selain itu, sampah plastik yang tidak dikelola dengan baik juga dapat menyumbat saluran air dan menyebabkan genangan.<br><br>Upaya pengelolaan sampah plastik di lingkungan sekolah sebenarnya telah dilakukan, seperti penyediaan tempat sampah terpilah dan kegiatan kerja bakti rutin. Namun, hasil observasi menunjukkan bahwa kesadaran siswa dalam memilah dan membuang sampah masih rendah.</div>`,
+                q: "Informasi yang tepat berdasarkan teks tersebut adalah …",
+                options: [
+                    "Sampah plastik di lingkungan sekolah berasal dari berbagai aktivitas siswa, tetapi belum menimbulkan dampak yang serius terhadap lingkungan sekitar",
+                    "Sampah plastik di lingkungan sekolah sulit terurai sehingga dapat menimbulkan pencemaran lingkungan dan mengganggu keseimbangan ekosistem",
+                    "Pengelolaan sampah plastik di sekolah sudah berjalan optimal karena didukung oleh kesadaran siswa dalam memilah dan membuang sampah",
+                    "Upaya pengurangan sampah plastik di sekolah belum pernah dilakukan sehingga diperlukan tindakan awal dalam pengelolaan lingkungan"
+                ],
+                answer: 1
+            },
+            {
+                id: 41,
+                stimulus: `<div class="illustration-box"><div class="font-bold text-slate-800 text-base mb-1">INFOGRAFIS: PENTINGNYA MENJAGA KEBERSIHAN LINGKUNGAN SEKOLAH</div><div class="bg-white p-3 border rounded text-xs text-left max-w-md mx-auto space-y-1.5"><p><b>1. Tesis:</b> Menjaga kebersihan sekolah merupakan tanggung jawab seluruh warga sekolah demi terciptanya suasana yang nyaman dan sehat.</p><p><b>2. Argumen:</b> Meningkatkan kesehatan, mendukung konsentrasi belajar, membentuk karakter peduli lingkungan, dan menciptakan lingkungan indah.</p><p><b>3. Kesimpulan:</b> Menjaga kebersihan lingkungan sekolah bukan hanya tugas petugas kebersihan, tetapi merupakan tanggung jawab bersama.</p></div></div>`,
+                q: "Pesan utama yang ingin disampaikan melalui infografis tersebut adalah …",
+                options: [
+                    "Kebersihan lingkungan sekolah hanya menjadi tanggung jawab petugas kebersihan agar sekolah terlihat rapi dan indah.",
+                    "Lingkungan sekolah yang bersih hanya berfungsi untuk meningkatkan keindahan tanpa berpengaruh pada proses belajar siswa.",
+                    "Menjaga kebersihan lingkungan sekolah merupakan tanggung jawab bersama yang berdampak pada kesehatan, kenyamanan, dan kualitas belajar siswa.",
+                    "Kegiatan menjaga kebersihan lingkungan sekolah sebaiknya dilakukan hanya pada waktu tertentu agar tidak mengganggu pembelajaran."
+                ],
+                answer: 2
+            },
+            {
+                id: 42,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">DISKUSI: PERLUKAH SERAGAM SEKOLAH?</h5>Penggunaan seragam sekolah menjadi topik diskusi terhangat antara orang tua dan pengelola sekolah. Pada pihak-pihak pendukung, mereka berpendapat bahwa seragam sekolah bisa mengurangi adanya tekanan pada anak dari teman sebayanya. Seragam juga dapat memberikan jalan keluar bagi anak-anak miskin, agar tidak menerima ejekan dari anak-anak yang hidupnya serba berkecukupan. Selain itu, seragam pun terbuat dari bahan yang tahan lama dan mudah dirawat.<br><br>Sementara itu, pihak-pihak yang kontra berpendapat bahwa seragam bisa menghalangi pengekspresian diri melalui pakaian. Menggunakan seragam sama saja memaksa anak-anak mencari cara lain untuk menempatkan diri tentang siapa mereka.</div>`,
+                q: "Informasi yang menunjukkan alasan pihak yang mendukung penggunaan seragam sekolah adalah …",
+                options: [
+                    "Seragam sekolah dianggap mampu mengurangi tekanan sosial di antara siswa serta membantu mencegah terjadinya ejekan terhadap siswa dari latar belakang ekonomi yang berbeda.",
+                    "Seragam sekolah dinilai dapat membatasi kebebasan siswa dalam mengekspresikan diri sehingga mereka kesulitan menunjukkan identitas pribadi melalui pakaian yang dikenakan.",
+                    "Seragam sekolah dipandang sebagai bentuk aturan yang memaksa siswa untuk mencari cara lain dalam menampilkan jati diri mereka di lingkungan sekolah.",
+                    "Seragam sekolah menjadi kebijakan yang dapat ditentukan masing-masing sekolah sesuai dengan penerapan konsep Manajemen Berbasis Sekolah dalam dunia pendidikan."
+                ],
+                answer: 0
+            },
+            {
+                id: 43,
+                stimulus: `<div class="illustration-box"><div class="font-bold text-slate-800 mb-1">POSTER: JUS SEHAT SEGAR</div><p class="text-sm font-semibold text-orange-600 mb-2">"Minum jus setiap hari membuat tubuh lebih sehat dan segar!"</p><div class="grid grid-cols-2 gap-2 text-xs text-left max-w-sm mx-auto bg-white p-3 border rounded"><div class="flex items-center">✓ Meningkatkan imunitas</div><div class="flex items-center">✓ Membantu pencernaan</div><div class="flex items-center">✓ Sumber antioksidan</div><div class="flex items-center">✓ Mengurangi rasa lelah</div></div></div>`,
+                q: "Kalimat pada poster yang mengandung hubungan sebab-akibat adalah …",
+                options: [
+                    "Jus Sehat Segar dibuat dari buah-buahan pilihan yang berkualitas dan higienis untuk dikonsumsi setiap hari.",
+                    "Minum jus setiap hari membuat tubuh lebih sehat dan segar sehingga aktivitas menjadi lebih optimal.",
+                    "Jus Sehat Segar tersedia dalam berbagai varian rasa yang dapat dipilih sesuai selera pelanggan.",
+                    "Produk Jus Sehat Segar dijual dengan harga terjangkau dan cocok untuk semua kalangan masyarakat."
+                ],
+                answer: 1
+            },
+            {
+                id: 44,
+                stimulus: `<div class="illustration-box"><div class="font-bold text-slate-800 mb-2">GRAFIK BATANG: KONDISI KEBERSIHAN LINGKUNGAN SEKOLAH</div><div class="space-y-2 max-w-md mx-auto text-xs text-left bg-white p-4 border rounded"><div><div class="flex justify-between font-semibold"><span>Sangat Bersih</span><span>40%</span></div><div class="w-full bg-slate-200 h-3 rounded"><div class="bg-blue-600 h-3 rounded" style="width: 40%"></div></div></div><div><div class="flex justify-between font-semibold"><span>Bersih</span><span>30%</span></div><div class="w-full bg-slate-200 h-3 rounded"><div class="bg-blue-500 h-3 rounded" style="width: 30%"></div></div></div><div><div class="flex justify-between font-semibold"><span>Cukup</span><span>20%</span></div><div class="w-full bg-slate-200 h-3 rounded"><div class="bg-blue-400 h-3 rounded" style="width: 20%"></div></div></div><div><div class="flex justify-between font-semibold"><span>Kurang Bersih</span><span>10%</span></div><div class="w-full bg-slate-200 h-3 rounded"><div class="bg-blue-300 h-3 rounded" style="width: 10%"></div></div></div></div></div>`,
+                q: "Berdasarkan data pada grafik tersebut, pernyataan yang paling tepat adalah …",
+                options: [
+                    "Sebagian besar lingkungan sekolah masih berada pada kategori kurang bersih sehingga perlu perhatian khusus dari seluruh warga sekolah.",
+                    "Mayoritas kondisi lingkungan sekolah berada pada kategori sangat bersih dan bersih, sehingga menunjukkan kesadaran menjaga kebersihan sudah cukup baik.",
+                    "Jumlah sekolah dengan kategori cukup dan kurang bersih lebih banyak dibandingkan dengan kategori bersih dan sangat bersih secara keseluruhan.",
+                    "Kondisi kebersihan lingkungan sekolah didominasi oleh kategori cukup bersih sehingga belum menunjukkan adanya upaya nyata dalam menjaga kebersihan."
+                ],
+                answer: 1
+            },
+            {
+                id: 45,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">RUMAH TONGKONAN</h5>Tongkonan adalah rumah adat masyarakat Toraja. Tongkonan berasal dari kata tongkon yang artinya duduk bersama-sama. Rumah adat ini terbuat dari kayu yang kokoh berkualitas juara dan dihias dengan apik melalui ukiran bermotif garis lengkung harmonis. Suku Toraja juga menghias atap tersebut dengan tanduk kerbau. Kerbau memang perlambang kebangsawanan Suku Toraja. Atap rumah Tongkonan melengkung menyerupai perahu. Di setiap bangunan bagian depan terdapat deretan tanduk kerbau yang ditancapkan.</div>`,
+                q: "Berdasarkan informasi dalam teks, dapat diprediksi bahwa masyarakat Toraja …",
+                options: [
+                    "Sangat menghargai nilai budaya dan status sosial yang tercermin melalui bentuk rumah adat serta hiasan yang digunakan pada bangunan tersebut.",
+                    "Lebih mengutamakan fungsi praktis bangunan dibandingkan nilai estetika sehingga rumah adat dibuat sederhana tanpa banyak hiasan.",
+                    "Cenderung menggunakan bahan bangunan modern agar rumah adat terlihat lebih kuat dan mengikuti perkembangan zaman.",
+                    "Membangun rumah adat tanpa mempertimbangkan makna simbolis sehingga hiasan yang digunakan hanya sebagai pelengkap semata."
+                ],
+                answer: 0
+            },
+            {
+                id: 46,
+                stimulus: `<div class="stimulus-box font-serif text-sm">Bandung, 12 Februari 2026<br><br>Hai, Rani!<br>Apa kabar? Semoga kamu selalu sehat di sana. Aku ingin berbagi cerita tentang kegiatan baruku di sekolah. Sejak mengikuti ekstrakurikuler fotografi, aku jadi lebih sering memperhatikan lingkungan sekitar. Aku juga belajar banyak tentang cara mengambil gambar yang menarik. Meskipun awalnya terasa sulit, sekarang aku mulai menikmati prosesnya.<br><br>Oh ya, minggu depan kami akan mengadakan pameran kecil di sekolah. Aku berharap kamu bisa datang dan melihat hasil karyaku.<br><br>Sampai di sini dulu ceritaku. Kutunggu kabar darimu, ya!<br><br>Salam hangat,<br><b>Dina</b></div>`,
+                q: "Informasi yang dapat disimpulkan dari isi surat tersebut adalah …",
+                options: [
+                    "Penulis merasa terpaksa mengikuti kegiatan ekstrakurikuler fotografi karena tuntutan dari pihak sekolah meskipun belum memahami manfaatnya.",
+                    "Penulis mulai menikmati kegiatan fotografi setelah sebelumnya mengalami kesulitan dalam mempelajari teknik pengambilan gambar.",
+                    "Penulis mengikuti kegiatan pameran fotografi di luar sekolah sebagai bagian dari lomba yang diadakan secara nasional.",
+                    "Penulis tidak memiliki ketertarikan terhadap lingkungan sekitar meskipun mengikuti kegiatan ekstrakurikuler fotografi di sekolah."
+                ],
+                answer: 1
+            },
+            {
+                id: 47,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">PAGI YANG TENANG DI TEPI DANAU</h5>Pagi hari di tepi danau itu terasa begitu menenangkan. Kabut tipis menggantung di atas permukaan air yang tenang, menciptakan pemandangan seolah-olah danau tersebut diselimuti kain putih halus. Sinar matahari perlahan muncul dari balik perbukitan, memancarkan cahaya keemasan yang memantul di permukaan air. Pepohonan hijau di sekitar danau tampak berdiri kokoh, dengan dedaunan yang bergoyang pelan tertiup angin sejuk.<br><br>Dari kejauhan, terdengar suara burung-burung berkicau bersahutan, menambah kesan damai dan alami. Sesekali, suara gemericik air dari aliran kecil di pinggir danau terdengar jelas, seolah menjadi irama alam yang menenangkan hati. Keindahan danau tersebut tidak hanya memanjakan mata, tetapi juga memberikan ketenangan bagi siapa saja yang berada di sana.</div>`,
+                q: "Citraan yang paling dominan dalam kutipan teks tersebut adalah …",
+                options: [
+                    "Citraan pendengaran dan peraba",
+                    "Citraan penglihatan dan penciuman",
+                    "Citraan penglihatan dan pendengaran",
+                    "Citraan peraba dan gerak"
+                ],
+                answer: 2
+            },
+            {
+                id: 48,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">PENGGUNAAN GAWAI DALAM PEMBELAJARAN</h5>Gawai memungkinkan peserta didik untuk mengakses berbagai informasi dengan cepat dan mudah. Mereka dapat mencari referensi tambahan, menonton video pembelajaran, serta menggunakan aplikasi edukatif yang mendukung pemahaman materi. Selain itu, penggunaan gawai juga dinilai dapat meningkatkan motivasi belajar karena pembelajaran menjadi lebih menarik dan interaktif.<br><br>Pendukung penggunaan gawai berpendapat bahwa teknologi merupakan bagian penting dari kehidupan modern yang tidak dapat dihindari sehingga perlu diarahkan secara tepat.</div>`,
+                q: "Berdasarkan kutipan teks tersebut, kalimat yang menunjukkan sikap pro (mendukung penggunaan gawai dalam pembelajaran) adalah …",
+                options: [
+                    "Penggunaan gawai dalam pembelajaran saat ini menjadi topik yang banyak diperbincangkan oleh berbagai kalangan dalam dunia pendidikan.",
+                    "Peserta didik berpotensi mengalami distraksi karena penggunaan gawai untuk mengakses media sosial dan permainan yang tidak berkaitan dengan pembelajaran.",
+                    "Gawai memungkinkan peserta didik memperoleh akses informasi secara luas dan cepat sehingga dapat mendukung efektivitas proses pembelajaran.",
+                    "Penggunaan gawai dalam pembelajaran dikhawatirkan dapat menurunkan tingkat konsentrasi peserta didik selama mengikuti kegiatan belajar di kelas."
+                ],
+                answer: 2
+            },
+            {
+                id: 49,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">PENTINGNYA LITERASI DI ERA DIGITAL</h5>Dalam sebuah artikel pendidikan disebutkan bahwa literasi merupakan kemampuan penting yang harus dimiliki oleh setiap individu di era modern ini. Menurut UNESCO literasi tidak hanya berkaitan dengan kemampuan membaca dan menulis tetapi juga kemampuan memahami, mengevaluasi, dan menggunakan informasi secara efektif. Hal ini menunjukkan bahwa literasi memiliki peran yang sangat penting dalam meningkatkan kualitas sumber daya manusia.</div>`,
+                q: "Berdasarkan kutipan teks tersebut, perbaikan yang tepat terhadap kesalahan penulisan kutipan adalah …",
+                options: [
+                    "Menurut UNESCO, literasi tidak hanya berkaitan dengan kemampuan membaca dan menulis, tetapi juga kemampuan memahami, mengevaluasi, dan menggunakan informasi secara efektif.",
+                    "Menurut UNESCO literasi tidak hanya berkaitan dengan kemampuan membaca dan menulis tetapi juga kemampuan memahami mengevaluasi dan menggunakan informasi secara efektif.",
+                    "Menurut UNESCO: literasi tidak hanya berkaitan dengan kemampuan membaca dan menulis tetapi juga kemampuan memahami, mengevaluasi, dan menggunakan informasi secara efektif",
+                    "Menurut UNESCO; literasi tidak hanya berkaitan dengan kemampuan membaca dan menulis, tetapi juga kemampuan memahami, mengevaluasi, dan menggunakan informasi secara efektif"
+                ],
+                answer: 0
+            },
+            {
+                id: 50,
+                stimulus: `<div class="stimulus-box"><h5 class="font-bold text-blue-800 mb-1">PENGALAMAN MENGIKUTI KEGIATAN BAKTI SOSIAL</h5>Pada hari Sabtu pagi, saya bersama teman-teman sekolah mengikuti kegiatan bakti sosial di sebuah desa yang terletak di pinggiran kota. Sesampainya di sana, kami disambut hangat oleh warga desa. Kegiatan dimulai dengan membersihkan lingkungan sekitar, seperti memungut sampah dan merapikan halaman rumah warga. Selain itu, kami juga membantu mengecat fasilitas umum yang sudah mulai kusam. Setelah kegiatan bersih-bersih selesai, kami melanjutkan dengan pembagian sembako kepada warga yang membutuhkan. Sekitar pukul 13.00, kami bersiap untuk kembali ke sekolah.</div>`,
+                q: "Berdasarkan kutipan teks tersebut, informasi yang sesuai dengan isi teks adalah …",
+                options: [
+                    "Kegiatan bakti sosial dilaksanakan pada hari Sabtu pagi dengan perjalanan singkat tanpa adanya interaksi langsung dengan warga sekitar desa.",
+                    "Peserta kegiatan hanya melakukan pembagian bantuan kepada warga tanpa melibatkan diri dalam aktivitas lain seperti kerja bakti atau perbaikan fasilitas umum.",
+                    "Kegiatan bakti sosial lebih difokuskan pada kegiatan hiburan bersama warga sehingga tidak banyak melibatkan aktivitas kerja sama secara langsung di lapangan.",
+                    "Kegiatan bakti sosial melibatkan kerja bakti membersihkan lingkungan, pengecatan fasilitas umum, serta pembagian bantuan kepada warga sekitar desa."
+                ],
+                answer: 3
+            }
+        ];
+
+        // State Aplikasi
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(examQuestions.length).fill(null);
+        let studentData = { name: "", class: "" };
+        let timerInterval = null;
+        let remainingSeconds = 90 * 60; // 90 Menit
+
+        // Fungsi Mulai Ujian
+        function startExam(e) {
+            e.preventDefault();
+            const nameInput = document.getElementById('studentName').value.trim();
+            const classInput = document.getElementById('studentClass').value;
+
+            if (!nameInput || !classInput) {
+                alert("Harap isi Nama dan pilih Kelas terlebih dahulu!");
+                return;
+            }
+
+            studentData.name = nameInput;
+            studentData.class = classInput;
+
+            // UI Transitions
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('examSection').classList.remove('hidden');
+            document.getElementById('timerContainer').classList.remove('hidden');
+            document.getElementById('studentInfoBadge').innerText = `Peserta: ${studentData.name} | Kelas: ${studentData.class}`;
+
+            initNumberGrid();
+            renderQuestion(currentQuestionIndex);
+            startTimer();
+        }
+
+        // Render Navigasi Grid Nomor Soal
+        function initNumberGrid() {
+            const grid = document.getElementById('numberGrid');
+            grid.innerHTML = '';
+            examQuestions.forEach((q, idx) => {
+                const btn = document.createElement('button');
+                btn.id = `grid-btn-${idx}`;
+                btn.className = `p-2 rounded font-bold text-xs border transition ${
+                    idx === currentQuestionIndex 
+                    ? 'border-blue-600 text-blue-600 bg-blue-50' 
+                    : 'border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100'
+                }`;
+                btn.innerText = idx + 1;
+                btn.onclick = () => jumpToQuestion(idx);
+                grid.appendChild(btn);
+            });
+        }
+
+        // Update Tampilan Nomor Soal
+        function updateGridStatus() {
+            examQuestions.forEach((_, idx) => {
+                const btn = document.getElementById(`grid-btn-${idx}`);
+                if (!btn) return;
+                
+                const isAnswered = userAnswers[idx] !== null;
+                const isCurrent = idx === currentQuestionIndex;
+
+                if (isCurrent) {
+                    btn.className = "p-2 rounded font-bold text-xs border-2 border-blue-600 text-white bg-blue-600 shadow";
+                } else if (isAnswered) {
+                    btn.className = "p-2 rounded font-bold text-xs border border-emerald-600 text-white bg-emerald-600";
+                } else {
+                    btn.className = "p-2 rounded font-bold text-xs border border-slate-300 text-slate-700 bg-slate-50 hover:bg-slate-100";
+                }
+            });
+        }
+
+        // Render Butir Soal Tertentu
+        function renderQuestion(index) {
+            const qData = examQuestions[index];
+            document.getElementById('questionNumberBadge').innerText = `Soal No. ${index + 1} dari ${examQuestions.length}`;
+            document.getElementById('stimulusArea').innerHTML = qData.stimulus || '';
+            document.getElementById('questionText').innerText = qData.q;
+
+            const optContainer = document.getElementById('optionsContainer');
+            optContainer.innerHTML = '';
+
+            const alphabet = ['A', 'B', 'C', 'D'];
+            qData.options.forEach((opt, optIdx) => {
+                const isSelected = userAnswers[index] === optIdx;
+                const optDiv = document.createElement('div');
+                optDiv.className = `flex items-start p-3 rounded-lg border cursor-pointer transition ${
+                    isSelected 
+                    ? 'bg-blue-50 border-blue-600 text-blue-900 font-medium' 
+                    : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-700'
+                }`;
+                optDiv.onclick = () => selectOption(optIdx);
+
+                optDiv.innerHTML = `
+                    <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold mr-3 shrink-0 ${
+                        isSelected ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 border'
+                    }">${alphabet[optIdx]}</span>
+                    <span class="text-sm leading-relaxed">${opt}</span>
+                `;
+                optContainer.appendChild(optDiv);
+            });
+
+            // Navigasi Button State
+            document.getElementById('prevBtn').disabled = index === 0;
+            document.getElementById('prevBtn').style.opacity = index === 0 ? "0.4" : "1";
+
+            if (index === examQuestions.length - 1) {
+                document.getElementById('nextBtn').classList.add('hidden');
+                document.getElementById('finishBtn').classList.remove('hidden');
+            } else {
+                document.getElementById('nextBtn').classList.remove('hidden');
+                document.getElementById('finishBtn').classList.add('hidden');
+            }
+
+            updateGridStatus();
+        }
+
+        function selectOption(optIdx) {
+            userAnswers[currentQuestionIndex] = optIdx;
+            renderQuestion(currentQuestionIndex);
+        }
+
+        function nextQuestion() {
+            if (currentQuestionIndex < examQuestions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion(currentQuestionIndex);
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion(currentQuestionIndex);
+            }
+        }
+
+        function jumpToQuestion(idx) {
+            currentQuestionIndex = idx;
+            renderQuestion(currentQuestionIndex);
+        }
+
+        // Timer Function
+        function startTimer() {
+            const timerDisplay = document.getElementById('timerDisplay');
+            timerInterval = setInterval(() => {
+                if (remainingSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Waktu pengerjaan telah habis!");
+                    finishExam();
+                    return;
+                }
+                remainingSeconds--;
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = remainingSeconds % 60;
+                timerDisplay.innerText = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        function confirmFinish() {
+            const answeredCount = userAnswers.filter(a => a !== null).length;
+            const unanswered = examQuestions.length - answeredCount;
+            let msg = "Apakah Anda yakin ingin menyelesaikan ujian?";
+            if (unanswered > 0) {
+                msg = `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin menyelesaikan ujian?`;
+            }
+            if (confirm(msg)) {
+                finishExam();
+            }
+        }
+
+        // Selesai Ujian & Hitung Skor
+        function finishExam() {
+            clearInterval(timerInterval);
+            document.getElementById('examSection').classList.add('hidden');
+            document.getElementById('timerContainer').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+
+            let correctCount = 0;
+            examQuestions.forEach((q, idx) => {
+                if (userAnswers[idx] === q.answer) {
+                    correctCount++;
+                }
+            });
+
+            const finalScore = Math.round((correctCount / examQuestions.length) * 100);
+
+            document.getElementById('resName').innerText = studentData.name;
+            document.getElementById('resClass').innerText = `Kelas ${studentData.class}`;
+            document.getElementById('resCorrect').innerText = `${correctCount} / ${examQuestions.length}`;
+            document.getElementById('resScore').innerText = finalScore;
+
+            // Siapkan list review
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '';
+            const alphabet = ['A', 'B', 'C', 'D'];
+            examQuestions.forEach((q, idx) => {
+                const userAns = userAnswers[idx];
+                const isCorrect = userAns === q.answer;
+                const div = document.createElement('div');
+                div.className = `p-3 rounded border ${isCorrect ? 'bg-emerald-50 border-emerald-300' : 'bg-rose-50 border-rose-300'}`;
+                div.innerHTML = `
+                    <div class="font-bold mb-1 ${isCorrect ? 'text-emerald-800' : 'text-rose-800'}">
+                        No. ${idx + 1}: ${isCorrect ? 'BENAR (+2)' : 'SALAH (0)'}
+                    </div>
+                    <div class="text-slate-600 mb-1"><b>Pertanyaan:</b> ${q.q}</div>
+                    <div class="text-slate-700"><b>Jawaban Anda:</b> ${userAns !== null ? alphabet[userAns] + '. ' + q.options[userAns] : '<i>Tidak dijawab</i>'}</div>
+                    <div class="text-emerald-700 font-semibold"><b>Kunci Jawaban:</b> ${alphabet[q.answer]}. ${q.options[q.answer]}</div>
+                `;
+                reviewList.appendChild(div);
+            });
+        }
+
+        function toggleKeyReview() {
+            const review = document.getElementById('reviewContainer');
+            review.classList.toggle('hidden');
+        }
+    </script>
+</body>
+</html>
