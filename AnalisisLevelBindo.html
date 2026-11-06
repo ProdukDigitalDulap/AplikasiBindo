@@ -1,0 +1,1681 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kuis Analisis HOTS Bahasa Indonesia Kelas 9 - Kurikulum Merdeka</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Plus Jakarta Sans & Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    h1, h2, h3, h4, .font-heading {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    /* Touch & Drag Styling */
+    .drag-item {
+      cursor: grab;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    .drag-item:active {
+      cursor: grabbing;
+    }
+    .drag-over {
+      border: 2px dashed #4f46e5 !important;
+      background-color: #eef2ff !important;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #printArea, #printArea * {
+        visibility: visible;
+      }
+      #printArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 20px;
+      }
+      .no-print {
+        display: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased selection:bg-indigo-500 selection:text-white">
+
+  <!-- TOP BAR / HEADER -->
+  <header class="bg-white/95 backdrop-blur-md border-b border-slate-200 sticky top-0 z-40 px-4 py-3 shadow-sm no-print">
+    <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+          <i class="fa-solid fa-feather-pointed text-lg"></i>
+        </div>
+        <div>
+          <h1 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">Lentera Bahasa: Tantangan HOTS</h1>
+          <p class="text-xs text-slate-500 font-medium">Bahasa Indonesia Kelas IX SMP • Teks Deskripsi, Prosedur & Rekon</p>
+        </div>
+      </div>
+
+      <!-- Live Meta Info saat Quiz Aktif -->
+      <div id="topQuizMeta" class="hidden flex items-center gap-2 sm:gap-4">
+        <!-- Master Timer -->
+        <div class="flex items-center gap-1.5 sm:gap-2 bg-amber-50 border border-amber-200 text-amber-900 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold shadow-xs">
+          <i class="fa-regular fa-clock text-amber-600"></i>
+          <span id="timerDisplay">20:00</span>
+        </div>
+        <!-- Live Score -->
+        <div class="flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 text-indigo-900 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold shadow-xs">
+          <i class="fa-solid fa-star text-amber-500"></i>
+          <span id="currentScoreBadge">0 Poin</span>
+        </div>
+        <!-- Attempts / Nyawa (3 Peluang) -->
+        <div class="flex items-center gap-1.5 bg-rose-50 border border-rose-200 text-rose-800 px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-semibold shadow-xs">
+          <span class="hidden md:inline text-[11px] uppercase tracking-wider text-rose-600">Peluang:</span>
+          <span id="heartsContainer" class="flex items-center gap-1 text-rose-500 text-sm">
+            <i class="fa-solid fa-heart"></i>
+            <i class="fa-solid fa-heart"></i>
+            <i class="fa-solid fa-heart"></i>
+          </span>
+        </div>
+        <!-- Audio Button -->
+        <button id="btnSoundToggle" title="Matikan/Nyalakan Suara" class="w-9 h-9 flex items-center justify-center rounded-xl border border-slate-200 hover:bg-slate-100 text-slate-600 transition">
+          <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- CONTENT WRAPPER -->
+  <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 md:p-8 flex flex-col justify-center">
+
+    <!-- 1. WELCOME & REGISTRATION SCREEN -->
+    <section id="screenWelcome" class="max-w-xl w-full mx-auto bg-white rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200 p-6 sm:p-8 transition-all">
+      <div class="text-center mb-6">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold text-xs rounded-full mb-3 border border-indigo-100">
+          <i class="fa-solid fa-award text-indigo-500"></i> Asesmen Kompetensi Literasi Kritis
+        </span>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-2 font-heading">Uji Daya Nalar Bahasa</h2>
+        <p class="text-sm text-slate-600 leading-relaxed">
+          Tantangan 10 level analitis berjenjang tanpa pilihan ganda konvensional. Siswa memiliki <strong>3 kali kesempatan</strong> per level. Jika belum berhasil setelah 3 kali mencoba, level dibuka secara paksa (skor 0) agar asesmen dapat berlanjut sampai tuntas.
+        </p>
+      </div>
+
+      <!-- Overview Cards -->
+      <div class="grid grid-cols-3 gap-2.5 text-center mb-6">
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+          <div class="text-indigo-600 font-bold text-lg"><i class="fa-solid fa-layer-group"></i> 10</div>
+          <div class="text-[11px] text-slate-500 font-medium">Level HOTS</div>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+          <div class="text-amber-600 font-bold text-lg"><i class="fa-regular fa-stopwatch"></i> 20 Menit</div>
+          <div class="text-[11px] text-slate-500 font-medium">Batas Waktu</div>
+        </div>
+        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
+          <div class="text-rose-600 font-bold text-lg"><i class="fa-solid fa-heart-pulse"></i> 3 Nyawa</div>
+          <div class="text-[11px] text-slate-500 font-medium">Per Soal</div>
+        </div>
+      </div>
+
+      <!-- Identity Form -->
+      <form id="formStartQuiz" class="space-y-4">
+        <div>
+          <label for="studentName" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Nama Lengkap Siswa</label>
+          <div class="relative">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 pointer-events-none text-slate-400">
+              <i class="fa-regular fa-user"></i>
+            </span>
+            <input type="text" id="studentName" required placeholder="Ketik nama lengkap Anda..." class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label for="studentClass" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Rombel / Kelas</label>
+            <select id="studentClass" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm bg-white">
+              <option value="">Pilih Kelas...</option>
+              <option value="9-A">Kelas 9-A</option>
+              <option value="9-B">Kelas 9-B</option>
+              <option value="9-C">Kelas 9-C</option>
+              <option value="9-D">Kelas 9-D</option>
+              <option value="9-E">Kelas 9-E</option>
+              <option value="9-F">Kelas 9-F</option>
+              <option value="9-G">Kelas 9-G</option>
+              <option value="9-H">Kelas 9-H</option>
+              <option value="9-I">Kelas 9-I</option>
+              <option value="9-J">Kelas 9-J</option>
+            </select>
+          </div>
+          <div>
+            <label for="studentAbsen" class="block text-xs font-semibold uppercase tracking-wider text-slate-600 mb-1.5">Nomor Absen</label>
+            <input type="number" id="studentAbsen" required min="1" max="50" placeholder="Contoh: 18" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-600 text-sm">
+          </div>
+        </div>
+
+        <div class="pt-3 flex flex-col gap-2.5">
+          <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg shadow-indigo-200 transition transform active:scale-[0.99] flex items-center justify-center gap-2">
+            <span>Buka Tantangan Level 1</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </button>
+          
+          <button type="button" id="btnOpenHistoryWelcome" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 px-4 rounded-xl text-xs transition flex items-center justify-center gap-2">
+            <i class="fa-solid fa-clock-rotate-left text-slate-500"></i>
+            <span>Lihat Arsip Nilai Siswa (LocalStorage)</span>
+          </button>
+        </div>
+      </form>
+    </section>
+
+    <!-- 2. GAMEPLAY LEVEL MAP & QUESTION SCREEN -->
+    <section id="screenGame" class="hidden flex-col gap-5">
+
+      <!-- Breadcrumbs & Step Levels 1 - 10 Tracker -->
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col gap-3">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Status Berjenjang:</span>
+            <span id="levelIndicatorText" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg border border-indigo-200">Level 1 dari 10</span>
+          </div>
+          <div class="text-xs text-slate-500 flex items-center gap-3">
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> Tuntas (+10)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> Hangus/Lewati (0)</span>
+            <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-slate-200 inline-block"></span> Terkunci</span>
+          </div>
+        </div>
+
+        <!-- 10 Level Badges Grid -->
+        <div class="grid grid-cols-10 gap-1.5 sm:gap-2" id="levelBubblesContainer">
+          <!-- Diinjeksi dinamis -->
+        </div>
+      </div>
+
+      <!-- Question Card Area -->
+      <div class="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden flex flex-col">
+        
+        <!-- Header Pertanyaan -->
+        <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-5 sm:p-6 flex flex-wrap justify-between items-center gap-3">
+          <div>
+            <div class="flex items-center gap-2 mb-1.5">
+              <span id="badgeGenre" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-wide uppercase bg-indigo-500/30 text-indigo-300 border border-indigo-400/30">
+                Teks Prosedur
+              </span>
+              <span id="badgeTypeName" class="text-xs text-slate-300 font-medium">
+                • Susun Urutan Logis
+              </span>
+            </div>
+            <h3 id="questionTitle" class="text-base sm:text-xl font-bold font-heading">Judul Tantangan Level</h3>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-medium">Bobot Maks:</span>
+            <span class="px-3 py-1 bg-amber-400/20 text-amber-300 border border-amber-400/30 rounded-lg text-xs sm:text-sm font-bold">10 Poin</span>
+          </div>
+        </div>
+
+        <!-- Stimulus Teks & Petunjuk -->
+        <div class="p-5 sm:p-6 border-b border-slate-100 bg-slate-50/80">
+          <div class="text-xs font-bold text-indigo-950 uppercase tracking-wider mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-align-left text-indigo-600"></i>
+            Stimulus Teks / Kasus Bahan Analisis:
+          </div>
+          <div id="stimulusContainer" class="p-4 bg-white rounded-xl border border-slate-200 text-sm sm:text-base leading-relaxed text-slate-700 shadow-xs custom-scroll max-h-64 overflow-y-auto">
+            <!-- Isi stimulus teks di sini -->
+          </div>
+
+          <div class="mt-4 flex items-start gap-2.5 text-xs sm:text-sm text-slate-700 bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-200/80">
+            <i class="fa-solid fa-circle-info text-indigo-600 mt-0.5 text-base"></i>
+            <div>
+              <strong class="text-indigo-900">Petunjuk Pengerjaan:</strong>
+              <span id="instructionText">Lakukan analisis dan jawab dengan cermat.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Interactive Answer Workplace -->
+        <div class="p-5 sm:p-6 flex-1 bg-white">
+          <div id="interactiveWorkspace">
+            <!-- Komponen interaktif: MCMA, Reorder, Classify, Teks Rumpang, Deteksi Kalimat Sumbang, Citraan, Majas -->
+          </div>
+        </div>
+
+        <!-- Feedback & Pembahasan Panel -->
+        <div id="feedbackPanel" class="hidden px-5 sm:px-6 py-4 border-t transition-all">
+          <div id="feedbackAlert" class="rounded-xl p-4 text-xs sm:text-sm leading-relaxed flex items-start gap-3">
+            <!-- Ulasan pembahasan muncul di sini -->
+          </div>
+        </div>
+
+        <!-- Footer Action Buttons -->
+        <div class="p-4 sm:p-6 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+          <button id="btnHint" type="button" class="text-xs sm:text-sm text-slate-600 hover:text-indigo-600 font-semibold flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-slate-200/60 transition">
+            <i class="fa-regular fa-lightbulb text-amber-500 text-base"></i>
+            <span>Petunjuk Analisis HOTS</span>
+          </button>
+
+          <div class="flex items-center gap-2.5">
+            <!-- Tombol Periksa Jawaban -->
+            <button id="btnCheckAnswer" type="button" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md shadow-indigo-200 transition active:scale-95 flex items-center gap-2 text-xs sm:text-sm">
+              <i class="fa-solid fa-check"></i>
+              <span>Periksa Analisis</span>
+            </button>
+
+            <!-- Tombol Lanjut (Jika Sukses) -->
+            <button id="btnNextLevel" type="button" class="hidden bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-2.5 rounded-xl shadow-md shadow-emerald-200 transition active:scale-95 flex items-center gap-2 text-xs sm:text-sm">
+              <span>Lanjut ke Level Berikutnya</span>
+              <i class="fa-solid fa-arrow-right"></i>
+            </button>
+
+            <!-- Tombol Buka Paksa Skenario 2 (Jika Nyawa Habis 3x) -->
+            <button id="btnForceNextLevel" type="button" class="hidden bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-2.5 rounded-xl shadow-md shadow-rose-200 transition active:scale-95 flex items-center gap-2 text-xs sm:text-sm animate-pulse">
+              <i class="fa-solid fa-forward-step"></i>
+              <span>Peluang Habis: Buka Paksa & Lewati (Skor 0)</span>
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- 3. RESULT & PRINTABLE REPORT SCREEN -->
+    <section id="screenResult" class="hidden max-w-3xl w-full mx-auto">
+      
+      <!-- Card Hasil yang Bisa Dicetak / Disimpan PDF -->
+      <div id="printArea" class="bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-8 md:p-10 text-center">
+        <div class="w-16 h-16 sm:w-20 sm:h-20 mx-auto rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center text-3xl mb-4 shadow-sm">
+          <i class="fa-solid fa-award"></i>
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1 font-heading">Laporan Asesmen Berjenjang</h2>
+        <p class="text-xs sm:text-sm text-slate-500 mb-6">Hasil Uji Nalar Kritis Bahasa Indonesia Kelas IX • Kurikulum Merdeka</p>
+
+        <!-- Identitas Siswa -->
+        <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-left text-xs sm:text-sm">
+          <div>
+            <span class="text-slate-400 block text-[11px] font-semibold uppercase">Nama Siswa</span>
+            <span id="resStudentName" class="font-bold text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[11px] font-semibold uppercase">Kelas</span>
+            <span id="resStudentClass" class="font-bold text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[11px] font-semibold uppercase">Nomor Absen</span>
+            <span id="resStudentAbsen" class="font-bold text-slate-800">-</span>
+          </div>
+          <div>
+            <span class="text-slate-400 block text-[11px] font-semibold uppercase">Waktu Tempuh</span>
+            <span id="resTimeSpent" class="font-bold text-indigo-700">-</span>
+          </div>
+        </div>
+
+        <!-- Metric Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+          <div class="p-4 rounded-2xl bg-indigo-50/80 border border-indigo-100">
+            <span class="text-[11px] text-indigo-600 font-semibold block uppercase tracking-wider">Total Skor</span>
+            <span id="resFinalScore" class="text-2xl sm:text-3xl font-extrabold text-indigo-900 my-0.5 block">0</span>
+            <span class="text-[11px] text-indigo-500">Maksimal 100 Poin</span>
+          </div>
+          <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-100">
+            <span class="text-[11px] text-emerald-600 font-semibold block uppercase tracking-wider">Level Tuntas</span>
+            <span id="resClearedCount" class="text-2xl sm:text-3xl font-extrabold text-emerald-900 my-0.5 block">0/10</span>
+            <span class="text-[11px] text-emerald-600">Benar Tervalidasi</span>
+          </div>
+          <div class="p-4 rounded-2xl bg-rose-50/80 border border-rose-100">
+            <span class="text-[11px] text-rose-600 font-semibold block uppercase tracking-wider">Level Hangus</span>
+            <span id="resSkippedCount" class="text-2xl sm:text-3xl font-extrabold text-rose-900 my-0.5 block">0/10</span>
+            <span class="text-[11px] text-rose-500">Dibuka Paksa</span>
+          </div>
+          <div class="p-4 rounded-2xl bg-amber-50/80 border border-amber-100">
+            <span class="text-[11px] text-amber-700 font-semibold block uppercase tracking-wider">Predikat Literasi</span>
+            <span id="resGrade" class="text-sm sm:text-base font-extrabold text-amber-900 mt-1.5 block">Perlu Bimbingan</span>
+            <span class="text-[10px] text-amber-600">Standar Kemendikbud</span>
+          </div>
+        </div>
+
+        <!-- Tabel Rincian Tiap Level -->
+        <div class="text-left mb-6">
+          <h4 class="font-bold text-slate-800 text-xs sm:text-sm mb-2.5 flex items-center justify-between">
+            <span><i class="fa-solid fa-list-check text-indigo-600 mr-1.5"></i> Rincian Capaian Tiap Level:</span>
+            <span class="text-xs text-slate-400 font-normal">Teks Deskripsi • Prosedur • Rekon</span>
+          </h4>
+          <div class="overflow-x-auto border border-slate-200 rounded-xl custom-scroll">
+            <table class="w-full text-xs sm:text-sm text-left">
+              <thead class="bg-slate-100 text-slate-600 font-semibold">
+                <tr>
+                  <th class="p-3">Level & Ranah</th>
+                  <th class="p-3">Genre Teks</th>
+                  <th class="p-3 text-center">Percobaan</th>
+                  <th class="p-3 text-center">Status</th>
+                  <th class="p-3 text-right">Skor</th>
+                </tr>
+              </thead>
+              <tbody id="resultTableBody" class="divide-y divide-slate-100">
+                <!-- Baris tabel diinjeksi via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="text-xs text-slate-400 italic text-left pb-4 border-b border-slate-100 mb-6">
+          * Catatan: Data telah terverifikasi dan otomatis disimpan secara permanen di basis data lokal peramban (LocalStorage).
+        </div>
+
+        <!-- Action Buttons (no-print) -->
+        <div class="flex flex-wrap items-center justify-center gap-3 no-print">
+          <button id="btnPrintReport" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl transition shadow-md shadow-indigo-100 flex items-center gap-2 text-xs sm:text-sm">
+            <i class="fa-solid fa-print"></i>
+            <span>Cetak Bukti Laporan (PDF)</span>
+          </button>
+          <button id="btnOpenHistoryResult" class="bg-violet-50 hover:bg-violet-100 text-violet-700 border border-violet-200 font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-2 text-xs sm:text-sm">
+            <i class="fa-solid fa-database"></i>
+            <span>Buka Arsip Nilai Siswa</span>
+          </button>
+          <button id="btnRestartQuiz" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-xl transition flex items-center gap-2 text-xs sm:text-sm">
+            <i class="fa-solid fa-arrow-rotate-right"></i>
+            <span>Ulangi Sesi Baru</span>
+          </button>
+        </div>
+
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- MODAL: RIWAYAT NILAI SISWA (LOCALSTORAGE) -->
+  <div id="modalHistory" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 flex flex-col max-h-[85vh]">
+      <div class="flex items-center justify-between pb-3.5 border-b border-slate-100">
+        <div class="flex items-center gap-2.5 text-indigo-700 font-bold">
+          <i class="fa-solid fa-clock-rotate-left text-lg"></i>
+          <span class="text-base sm:text-lg font-heading">Riwayat Nilai Siswa (LocalStorage)</span>
+        </div>
+        <button id="btnCloseHistory" class="text-slate-400 hover:text-slate-600 text-lg w-8 h-8 rounded-lg flex items-center justify-center hover:bg-slate-100 transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="py-4 overflow-y-auto flex-1 custom-scroll" id="historyListContainer">
+        <!-- List riwayat siswa -->
+      </div>
+
+      <div class="pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-3">
+        <button id="btnClearHistory" class="text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+          <i class="fa-regular fa-trash-can"></i>
+          <span>Hapus Semua Arsip</span>
+        </button>
+        <button id="btnCloseHistoryFooter" class="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2 px-5 rounded-xl text-xs transition">
+          Tutup Panel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: PETUNJUK ANALISIS HOTS -->
+  <div id="modalHint" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
+      <div class="flex items-center justify-between mb-3">
+        <div class="flex items-center gap-2 text-amber-600 font-bold">
+          <i class="fa-solid fa-lightbulb text-lg"></i>
+          <span class="text-base font-heading">Kiat Analisis HOTS</span>
+        </div>
+        <button id="btnCloseHint" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <p id="modalHintText" class="text-sm text-slate-600 leading-relaxed mb-5">
+        Perhatikan kaidah kebahasaan dan struktur teks secara objektif.
+      </p>
+      <button id="btnDismissHint" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-sm transition">
+        Saya Paham, Kembali Mengerjakan
+      </button>
+    </div>
+  </div>
+
+  <!-- AUDIO SYNTHESIZER ENGINE (Web Audio API - Mandiri tanpa file eksternal) -->
+  <script>
+    const AudioEngine = {
+      ctx: null,
+      enabled: true,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) this.ctx = new AudioContext();
+        }
+      },
+      playSuccess() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(440, now); // A4
+        osc.frequency.exponentialRampToValueAtTime(554.37, now + 0.1); // C#5
+        osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.2); // E5
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.4);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+      },
+      playWrong() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(240, now);
+        osc.frequency.exponentialRampToValueAtTime(140, now + 0.25);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      },
+      playClick() {
+        if (!this.enabled || !this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(750, now);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    };
+  </script>
+
+  <!-- DATABASE 10 LEVEL & LOGIKA KUIS -->
+  <script>
+    /*
+     * MASTER DATA 10 SOAL ANALISIS HOTS GABUNGAN KELAS 9 (KURIKULUM MERDEKA)
+     * Format Non-Pilihan Ganda Biasa:
+     * 1. MCMA (Ciri & Kaidah Teks Deskripsi Spasial)
+     * 2. Drag & Drop Urutan Langkah Logis Prosedur
+     * 3. Sortir Kategori Fakta vs Opini Teks Rekon Sejarah
+     * 4. Teks Rumpang Dropdown Konjungsi Temporal Kronologis
+     * 5. MCMA Analisis Kalimat Imperatif vs Persuasif
+     * 6. Matching Dropdown Cerapan Citraan Pancaindra
+     * 7. Deteksi Kalimat Sumbang / Keselamatan Prosedur
+     * 8. MCMA Sudut Pandang & Struktur Teks Rekon Faktual
+     * 9. Pasang Jenis Gaya Bahasa / Majas Teks Deskripsi
+     * 10. Sintesis Evaluatif Teks Hibrida (Deskripsi - Prosedur - Rekon)
+     */
+    const QUIZ_LEVELS = [
+      {
+        id: 1,
+        title: "Analisis Karakteristik & Unsur Kebahasaan Teks Deskripsi",
+        genre: "Teks Deskripsi",
+        type: "mcma",
+        typeName: "MCMA / Pilihan Ganda Kompleks",
+        points: 10,
+        hint: "Perhatikan kata konkret yang merangsang pancaindra, majas pembanding, serta ketiadaan langkah instruksi kerja.",
+        stimulus: `
+          <p class="font-serif italic text-slate-700 bg-amber-50/70 p-3.5 rounded-xl border-l-4 border-amber-500 mb-2 leading-relaxed">
+            "Gugusan tebing karang di Pantai Karang Gigi Hiu mencuat runcing ke cakrawala menyerupai deretan taring tajam predator purba. Deburan ombak laut selatan yang bergemuruh garang menghempas ceruk-ceruk batu gelap, menebarkan butiran buih putih beraroma asin garam yang segar saat angin senja membelai dingin permukaan kulit."
+          </p>
+          <p class="text-xs text-slate-500 font-medium">Berdasarkan cuplikan teks deskripsi di atas, analisislah kaidah kebahasaan dan gaya penulisan yang diterapkan oleh penulis.</p>
+        `,
+        instruction: "Pilihlah SEMUA pernyataan analisis yang BENAR mengenai ciri kebahasaan teks di atas! (Centang 3 opsi tepat)",
+        options: [
+          { id: "opt1", text: "Menggunakan kata konkret spesifik yang merangsang multisensori (penglihatan, pendengaran, penciuman, dan perabaan).", correct: true },
+          { id: "opt2", text: "Memanfaatkan gaya perumpamaan/asosiasi dengan membandingkan tebing batu menyerupai taring tajam predator purba.", correct: true },
+          { id: "opt3", text: "Didominasi oleh kalimat imperatif perintah langkah kerja terukur secara kronologis.", correct: false },
+          { id: "opt4", text: "Menggunakan kata sifat bernuansa cerapan indrawi seperti 'runcing', 'gemuruh garang', dan 'dingin'.", correct: true },
+          { id: "opt5", text: "Berstruktur fiktif dongeng dengan alur penyelesaian masalah tokoh khayalan.", correct: false }
+        ],
+        explanation: "Pilihan 1, 2, dan 4 tepat. Teks deskripsi menggunakan kata konkret/sifat indrawi ('runcing', 'dingin', 'garang'), asosiasi/simile ('menyerupai taring tajam predator'), dan melibatkan banyak indra. Opsi 3 adalah ciri teks prosedur, sedangkan opsi 5 adalah teks naratif imajinatif."
+      },
+      {
+        id: 2,
+        title: "Rekonstruksi Urutan Logis Langkah Prosedural Kompleks",
+        genre: "Teks Prosedur",
+        type: "reorder",
+        typeName: "Drag & Drop / Reorder Langkah",
+        points: 10,
+        hint: "Ingat prinsip prosedur ilmiah: persiapan bahan selalu mendahului pelarutan nutrisi, dan penutupan rapat harus sebelum fermentasi disimpan.",
+        stimulus: `
+          <p class="text-slate-700 leading-relaxed mb-2">
+            Berikut adalah tahapan acak dalam panduan <strong>"Pembuatan Pupuk Organik Cair (POC) dari Limbah Kulit Buah Skala Rumahan"</strong>. Susunlah urutan ini agar runtut dan tidak menggagalkan proses fermentasi.
+          </p>
+        `,
+        instruction: "Urutkan ke-5 tahapan langkah kerja berikut ke dalam alur yang logis dan runtut dari awal hingga akhir!",
+        initialOrder: [
+          { id: "stepC", text: "Tutup rapat wadah ember kedap udara, lalu simpan di tempat teduh selama 14 hari sambil membuka tutupnya tiap 2 hari untuk membuang gas.", orderKey: 4 },
+          { id: "stepA", text: "Cacah halus 2 kg sisa kulit buah (jeruk, pisang, pepaya) guna mempercepat proses penguraian oleh mikroorganisme.", orderKey: 1 },
+          { id: "stepE", text: "Saring cairan hasil fermentasi dengan kain kasa tipis untuk memisahkan ampas organik dari konsentrat nutrisi cair.", orderKey: 5 },
+          { id: "stepB", text: "Campurkan 50 ml larutan molase (gula) dan 1 tutup bioaktivator mikroba ke dalam 5 liter air bersih.", orderKey: 2 },
+          { id: "stepD", text: "Masukkan seluruh cacahan kulit buah ke dalam ember larutan bioaktivator, lalu aduk merata hingga terendam penuh.", orderKey: 3 }
+        ],
+        correctKeys: ["stepA", "stepB", "stepD", "stepC", "stepE"],
+        explanation: "Urutan logis pembuatan POC: (1) Mencacah limbah -> (2) Melarutkan nutrisi & bioaktivator -> (3) Memasukkan cacahan & mengaduk -> (4) Fermentasi anaerob tertutup dengan kontrol gas teratur -> (5) Penyaringan produk akhir."
+      },
+      {
+        id: 3,
+        title: "Klasifikasi Validitas Informasi: Fakta vs Opini Teks Rekon Sejarah",
+        genre: "Teks Rekon",
+        type: "classify",
+        typeName: "Sortir Kategori (Fakta vs Opini)",
+        points: 10,
+        hint: "Fakta memiliki bukti data waktu/tanggal, nama tokoh, dan arsip dokumen. Opini memuat kata sifat relatif, penafsiran subjektif, atau kata pengandaian.",
+        stimulus: `
+          <div class="bg-blue-50/70 p-4 rounded-xl border border-blue-200 text-slate-800 text-sm leading-relaxed mb-2">
+            <strong class="text-blue-950 block mb-1">Kutipan Teks Rekon Sejarah: Kiprah R.A. Kartini</strong>
+            "Raden Ajeng Kartini lahir di Jepara pada tanggal 21 April 1879 dari keluarga bangsawan Jawa. Beliau mendirikan sekolah wanita pertama di Jepara setelah giat membaca buku dan berkirim surat dengan sahabat penanya di Belanda. Kumpulan surat beliau yang diterbitkan oleh J.H. Abendanon menjadi bukti betapa tiada tandingannya keberanian pemikiran beliau. Tanpa surat-surat tersebut, kebangkitan emansipasi wanita di Nusantara barangkali akan tertinggal setengah abad lebih lama."
+          </div>
+        `,
+        instruction: "Klasifikasikan setiap pernyataan kutipan di bawah ini ke dalam kolom <strong>Fakta Historis</strong> atau <strong>Opini Penulis</strong>!",
+        items: [
+          { id: "c1", text: "R.A. Kartini lahir di Jepara pada tanggal 21 April 1879 dari keluarga bangsawan Jawa.", category: "fakta" },
+          { id: "c2", text: "Kumpulan surat beliau menjadi bukti betapa tiada tandingannya keberanian pemikiran beliau.", category: "opini" },
+          { id: "c3", text: "J.H. Abendanon mengumpulkan dan menerbitkan surat-surat korespondensi Kartini menjadi sebuah buku.", category: "fakta" },
+          { id: "c4", text: "Tanpa surat-surat tersebut, emansipasi wanita di Nusantara barangkali akan tertinggal setengah abad.", category: "opini" }
+        ],
+        categories: [
+          { id: "fakta", title: "Fakta Historis Objektif" },
+          { id: "opini", title: "Opini Subjektif Penulis" }
+        ],
+        explanation: "Pernyataan tanggal lahir dan penerbitan buku oleh J.H. Abendanon adalah fakta sejarah yang terekam dokumen. Penilaian 'tiada tandingannya' dan asumsi 'barangkali tertinggal setengah abad' adalah opini/penafsiran subjektif."
+      },
+      {
+        id: 4,
+        title: "Analisis Kohesi Gramatikal: Konjungsi Temporal Rekon",
+        genre: "Teks Rekon",
+        type: "fill_dropdown",
+        typeName: "Analisis Teks Rumpang Konjungsi",
+        points: 10,
+        hint: "Gunakan konjungsi kronologis intrakalimat dan antarkalimat yang menunjukkan kesinambungan urutan waktu yang runtut.",
+        stimulus: `
+          <p class="text-slate-700 leading-relaxed mb-2">
+            Bacalah kutipan teks rekon pribadi tentang kegiatan studi museum. Pilihlah kata hubung (konjungsi temporal/kronologis) yang paling tepat untuk mengisi bagian rumpang agar teks padu secara kohesif.
+          </p>
+          <div class="p-4 bg-slate-50 border rounded-xl text-slate-800 leading-loose text-sm sm:text-base">
+            Tepat pukul 08.00 bus sekolah kami tiba di halaman Museum Kebudayaan. 
+            <span class="font-bold text-indigo-700 underline decoration-indigo-400">[Bagian 1]</span> 
+            membeli tiket masuk dan menitipkan tas, pemandu museum mengarahkan kami menuju Ruang Peradaban Klasik. Kami meneliti prasasti batu kuno selama satu jam. 
+            <span class="font-bold text-indigo-700 underline decoration-indigo-400">[Bagian 2]</span>, 
+            kami diarahkan bergeser ke sayap timur untuk mengamati replika kapal tradisional. 
+            <span class="font-bold text-indigo-700 underline decoration-indigo-400">[Bagian 3]</span> 
+            kunjungan berakhir di pelataran utama, seluruh siswa mendengarkan kesimpulan reflektif dari kurator.
+          </div>
+        `,
+        instruction: "Pilihlah konjungsi temporal yang tepat untuk melengkapi [Bagian 1], [Bagian 2], dan [Bagian 3]!",
+        dropdowns: [
+          {
+            id: "drop1",
+            label: "Pilihan untuk [Bagian 1]:",
+            options: [
+              { val: "Setelah", text: "Setelah" },
+              { val: "Sehingga", text: "Sehingga" },
+              { val: "Kendatipun", text: "Kendatipun" }
+            ],
+            correct: "Setelah"
+          },
+          {
+            id: "drop2",
+            label: "Pilihan untuk [Bagian 2]:",
+            options: [
+              { val: "Bahkan", text: "Bahkan" },
+              { val: "Selanjutnya", text: "Selanjutnya" },
+              { val: "Padahal", text: "Padahal" }
+            ],
+            correct: "Selanjutnya"
+          },
+          {
+            id: "drop3",
+            label: "Pilihan untuk [Bagian 3]:",
+            options: [
+              { val: "Ketika", text: "Ketika" },
+              { val: "Sebelum", text: "Sebelum" },
+              { val: "Sebab", text: "Sebab" }
+            ],
+            correct: "Sebelum"
+          }
+        ],
+        explanation: "Konjungsi yang tepat: (1) 'Setelah' (keterangan waktu prasyarat melakukan kegiatan berikutnya), (2) 'Selanjutnya' (konjungsi antarkalimat penanda urutan peristiwa), (3) 'Sebelum' (keterangan waktu menjelang akhir acara)."
+      },
+      {
+        id: 5,
+        title: "Evaluasi Ragam Kalimat: Imperatif Teknis vs Persuasif",
+        genre: "Teks Prosedur",
+        type: "mcma",
+        typeName: "MCMA / Evaluasi Kaidah Kalimat",
+        points: 10,
+        hint: "Kalimat imperatif berisi instruksi tegas langsung (verba imperatif: tutuplah, pasang, pastikan). Kalimat persuasif bersifat membujuk, menyarankan, atau mengajak.",
+        stimulus: `
+          <div class="bg-emerald-50/70 p-4 rounded-xl border border-emerald-200 text-slate-800 text-sm mb-2">
+            <strong class="text-emerald-950 block mb-2">Petikan Teks Panduan Penghematan Energi Rumah Tangga:</strong>
+            <ol class="list-decimal list-inside space-y-1.5">
+              <li>"Cabut steker peralatan elektronik dari stopkontak saat perangkat tidak sedang difungsikan!"</li>
+              <li>"Mari kita galakkan pola hidup hemat listrik demi menyelamatkan kelestarian bumi tercinta."</li>
+              <li>"Bersihkan saringan debu pendingin ruangan (AC) secara berkala minimal sebulan sekali."</li>
+              <li>"Alangkah bijaknya jika kita mulai membiasakan mematikan lampu kamar yang tidak terpakai."</li>
+              <li>"Aturlah termostat penyejuk ruangan pada suhu konstan 24 hingga 25 derajat Celsius."</li>
+            </ol>
+          </div>
+        `,
+        instruction: "Pilihlah SEMUA kalimat yang tergolong sebagai <strong>KALIMAT IMPERATIF TEKNIS (Instruksi Kerja Langsung)</strong>! (Centang 3 opsi tepat)",
+        options: [
+          { id: "imp1", text: "Kalimat (1): 'Cabut steker peralatan elektronik dari stopkontak saat perangkat tidak difungsikan!'", correct: true },
+          { id: "imp2", text: "Kalimat (2): 'Mari kita galakkan pola hidup hemat listrik demi menyelamatkan kelestarian bumi tercinta.'", correct: false },
+          { id: "imp3", text: "Kalimat (3): 'Bersihkan saringan debu pendingin ruangan (AC) secara berkala minimal sebulan sekali.'", correct: true },
+          { id: "imp4", text: "Kalimat (4): 'Alangkah bijaknya jika kita mulai membiasakan mematikan lampu kamar yang tidak terpakai.'", correct: false },
+          { id: "imp5", text: "Kalimat (5): 'Aturlah termostat penyejuk ruangan pada suhu konstan 24 hingga 25 derajat Celsius.'", correct: true }
+        ],
+        explanation: "Kalimat (1), (3), dan (5) adalah imperatif karena memuat kata kerja perintah langsung ('Cabut', 'Bersihkan', 'Aturlah'). Kalimat (2) adalah kalimat ajakan/persuasif ('Mari'), sedangkan (4) adalah kalimat saran persuasif ('Alangkah bijaknya')."
+      },
+      {
+        id: 6,
+        title: "Pemetaan Citraan Pancaindra Teks Deskripsi Estetis",
+        genre: "Teks Deskripsi",
+        type: "matching_sense",
+        typeName: "Analisis Pasangan Cerapan Pancaindra",
+        points: 10,
+        hint: "Penciuman = bau/aroma; Penglihatan = warna/bentuk; Pendengaran = bunyi/suara; Perabaan = rasa suhu/sentuhan fisik kulit.",
+        stimulus: `
+          <p class="text-slate-700 leading-relaxed mb-2">
+            Teks deskripsi yang kuat sanggup menghadirkan pengalaman sensoris seolah-olah pembaca ikut melihat, mendengar, mencium, atau meraba objek yang digambarkan.
+          </p>
+        `,
+        instruction: "Pasangkan setiap kalimat kutipan deskriptif berikut dengan jenis cerapan pancaindra yang dominan dibangkitkannya!",
+        items: [
+          {
+            id: "sense1",
+            quote: "Tiupan angin kutub menusuk pori-pori hingga kulit jemari terasa beku kaku di balik mantel tebal.",
+            correct: "perabaan"
+          },
+          {
+            id: "sense2",
+            quote: "Aroma wangi tanah basah bercampur segarnya getah dedaunan pinus menguar pekat usai hujan reda.",
+            correct: "penciuman"
+          },
+          {
+            id: "sense3",
+            quote: "Gemertak patahan ranting kering terdengar berulang-ulang saat satwa malam melintas di semak rimba.",
+            correct: "pendengaran"
+          },
+          {
+            id: "sense4",
+            quote: "Semburat lembayung jingga keemasan perlahan memudar di ufuk barat berlatar siluet puncak merapi.",
+            correct: "penglihatan"
+          }
+        ],
+        senses: [
+          { id: "penglihatan", label: "Indra Penglihatan (Visual)" },
+          { id: "pendengaran", label: "Indra Pendengaran (Auditori)" },
+          { id: "penciuman", label: "Indra Penciuman (Olfaktori)" },
+          { id: "perabaan", label: "Indra Perabaan (Taktil/Termal)" }
+        ],
+        explanation: "Kalimat 1 = Perabaan ('menusuk pori-pori', 'beku kaku'). Kalimat 2 = Penciuman ('aroma wangi', 'menguar pekat'). Kalimat 3 = Pendengaran ('gemertak ranting terdengar'). Kalimat 4 = Penglihatan ('semburat lembayung', 'siluet puncak')."
+      },
+      {
+        id: 7,
+        title: "Deteksi Inkoherensi: Kalimat Sumbang Prosedur Keselamatan",
+        genre: "Teks Prosedur",
+        type: "detect_odd",
+        typeName: "Deteksi Interaktif Kalimat Sumbang",
+        points: 10,
+        hint: "Temukan 2 kalimat yang melanggar standar keselamatan darurat, tidak masuk akal, atau bertolak belakang dengan tujuan penyelamatan diri saat bencana.",
+        stimulus: `
+          <p class="text-slate-700 mb-2 leading-relaxed">
+            Bacalah draf teks prosedur tentang <strong>"Protokol Keselamatan Saat Terjadi Gempa Bumi di Gedung Bertingkat"</strong>. Di antara lima kalimat panduan di bawah ini, terdapat <strong>dua kalimat sumbang (kontradiktif/membahayakan keselamatan)</strong> yang harus dihilangkan.
+          </p>
+        `,
+        instruction: "Klik langsung pada 2 (dua) nomor kalimat yang TIDAK LOGIS / BERTENTANGAN dengan kaidah prosedur evakuasi gempa!",
+        sentences: [
+          { id: "s1", text: "1. Segeralah berlindung di bawah meja yang kokoh serta lindungi kepala dan leher menggunakan tas atau bantal.", odd: false },
+          { id: "s2", text: "2. Masuklah ke dalam lift darurat dengan tergesa-gesa agar dapat mencapai lantai dasar lebih cepat sebelum listrik padam.", odd: true },
+          { id: "s3", text: "3. Jauhi jendela kaca, cermin besar, dan rak lemari gantung yang berpotensi runtuh menimpa tubuh.", odd: false },
+          { id: "s4", text: "4. Sempatkan mengemas koper baju besar dan perabot elektronik berharga terlebih dahulu sebelum keluar ruangan.", odd: true },
+          { id: "s5", text: "5. Berjalanlah tertib menuruni tangga darurat menuju titik kumpul terbuka yang lapang dan aman.", odd: false }
+        ],
+        explanation: "Kalimat 2 salah karena saat gempa dilarang keras menggunakan lift (risiko macet/jatuh). Kalimat 4 salah karena evakuasi bencana menuntut penyelamatan nyawa secara cepat tanpa membawa barang bawaan berat yang menghambat evakuasi."
+      },
+      {
+        id: 8,
+        title: "Analisis Sudut Pandang & Struktur Teks Rekon Faktual",
+        genre: "Teks Rekon",
+        type: "mcma",
+        typeName: "MCMA / Analisis Struktur Teks Rekon",
+        points: 10,
+        hint: "Teks rekon sejarah memiliki struktur Orientasi, Rentetan Peristiwa, dan Reorientasi. Sudut pandang orang ketiga ditandai dengan penyebutan nama tokoh/bangsa tanpa kata ganti aku/kami.",
+        stimulus: `
+          <div class="bg-indigo-50/60 p-4 rounded-xl border border-indigo-200 text-slate-800 text-sm leading-relaxed mb-2">
+            <span class="block text-xs font-bold text-indigo-700 uppercase mb-1">Kutipan Bagian Penutup Teks Rekon Sejarah:</span>
+            "Keberhasilan penyelenggaraan Konferensi Asia Afrika (KAA) 1955 di Bandung akhirnya berhasil membuktikan kepada mata dunia bahwa bangsa-bangsa yang baru merdeka sanggup berdiri tegak memelopori perdamaian global. Bagi delegasi Indonesia, momentum ini bukan sekadar keberhasilan diplomasi formal, melainkan tonggak monumental kehormatan bangsa. Nilai Dasasila Bandung yang diwariskan hingga kini tetap menjadi lentera abadi bagi perjuangan keadilan antarbangsa."
+          </div>
+        `,
+        instruction: "Berdasarkan kutipan teks di atas, manakah analisis struktur dan kaidah kebahasaan yang TEPAT? (Centang 3 opsi benar)",
+        options: [
+          { id: "rk1", text: "Kutipan tersebut berkedudukan sebagai struktur 'Reorientasi' karena berisi kesimpulan, opini, dan penilaian akhir terhadap dampak peristiwa.", correct: true },
+          { id: "rk2", text: "Ditulis menggunakan sudut pandang orang ketiga (pengamat objektif) atas peristiwa sejarah nyata (rekon faktual).", correct: true },
+          { id: "rk3", text: "Kutipan ini merupakan bagian 'Orientasi' karena baru memperkenalkan latar tempat dan waktu berlangsungnya konferensi.", correct: false },
+          { id: "rk4", text: "Mengandung ungkapan bermakna emotif dan apresiatif tinggi seperti 'tonggak monumental' dan 'lentera abadi'.", correct: true },
+          { id: "rk5", text: "Teks di atas tergolong teks rekon imajinatif karena menyajikan peristiwa fiktif hasil rekaan pengarang.", correct: false }
+        ],
+        explanation: "Pilihan 1, 2, dan 4 benar. Paragraf penutup yang memuat evaluasi dan simpulan nilai sejarah adalah bagian Reorientasi. Ditulis dengan sudut pandang orang ketiga mengenai peristiwa nyata KAA 1955, serta memakai frasa bernilai rasa tinggi."
+      },
+      {
+        id: 9,
+        title: "Identifikasi Gaya Bahasa (Majas Teks Deskripsi)",
+        genre: "Teks Deskripsi",
+        type: "match_figures",
+        typeName: "Klasifikasi Gaya Bahasa / Majas",
+        points: 10,
+        hint: "Personifikasi = benda mati bertindak laksana manusia; Metafora = perbandingan langsung tanpa kata pembanding; Hiperbola = pengungkapan berlebihan melampaui kenyataan.",
+        stimulus: `
+          <p class="text-slate-700 leading-relaxed mb-2">
+            Gaya bahasa atau majas dimanfaatkan dalam teks deskripsi untuk membuat lukisan objek menjadi lebih berjiwa dan puitis di benak pembaca.
+          </p>
+        `,
+        instruction: "Tentukan majas yang tepat (Personifikasi, Metafora, atau Hiperbola) untuk masing-masing kalimat deskripsi berikut!",
+        pairs: [
+          {
+            id: "m1",
+            sentence: "Angin malam berbisik mesra ke telinga para pekemah di sepanjang bibir danau.",
+            correct: "Personifikasi"
+          },
+          {
+            id: "m2",
+            sentence: "Danau Toba adalah permata zamrud raksasa yang terpatri megah di dada Sumatra.",
+            correct: "Metafora"
+          },
+          {
+            id: "m3",
+            sentence: "Gemuruh gelegar petir di puncak gunung itu sanggup meruntuhkan seisi langit dunia.",
+            correct: "Hiperbola"
+          }
+        ],
+        figureOptions: ["Personifikasi", "Metafora", "Hiperbola"],
+        explanation: "1) Angin berbisik mesra = Personifikasi (benda mati berperilaku seperti manusia). 2) Danau Toba adalah permata zamrud = Metafora (perbandingan kiasan langsung). 3) Sanggup meruntuhkan seisi langit = Hiperbola (pernyataan berlebihan yang dramatis)."
+      },
+      {
+        id: 10,
+        title: "Sintesis Tingkat Tinggi: Evaluasi Analisis Teks Hibrida",
+        genre: "Sintesis Tiga Teks",
+        type: "mcma",
+        typeName: "MCMA / Evaluasi HOTS Teks Hibrida",
+        points: 10,
+        hint: "Cermati perpaduan fungsi: Bagian 1 menceritakan masa lalu (rekon), Bagian 2 melukiskan rupa alam (deskripsi), dan Bagian 3 berisi arahan teknis keselamatan (prosedur).",
+        stimulus: `
+          <div class="space-y-2.5 text-slate-800 text-sm leading-relaxed p-4 bg-slate-50 border border-slate-200 rounded-xl">
+            <p><strong>[Kutipan Bagian I]</strong> "Dua tahun lalu, rombongan pramuka sekolah kami mendaki jalur Puncak Sikunir. Suhu dingin menusuk tulang hingga 5 derajat Celsius ketika kami berkumpul di pos pendaftaran sebelum fajar menyingsing."</p>
+            <p><strong>[Kutipan Bagian II]</strong> "Dari batas jurang timur, kabut putih keemasan perlahan tersibak disinari mentari pagi. Lembah hijau terhampar megah bak permadani sutra berlatar kepulan asap kawah di kejauhan."</p>
+            <p><strong>[Kutipan Bagian III]</strong> "Bagi pendaki pemula, kenakanlah jaket penahan angin berlapis ganda, gunakan senter kepala saat menyusuri tangga bebatuan, dan berjalanlah secara stabil tanpa melompat."</p>
+          </div>
+        `,
+        instruction: "Berdasarkan telaah kritis terhadap ketiga kutipan di atas, manakah kesimpulan analisis yang VALID? (Centang 3 opsi tepat)",
+        options: [
+          { id: "sin1", text: "Bagian I mengemban fungsi teks rekon karena mencatat kronologi pengalaman masa lampau dengan penanda waktu spesifik ('Dua tahun lalu').", correct: true },
+          { id: "sin2", text: "Bagian II mengemban fungsi teks deskripsi karena melukiskan kemegahan lanskap fisik dengan cerapan visual dan perumpamaan asosiasi.", correct: true },
+          { id: "sin3", text: "Bagian III mengemban fungsi teks prosedur karena memuat kalimat instruksi/panduan teknis keamanan pendakian bertarget tindakan.", correct: true },
+          { id: "sin4", text: "Ketiga kutipan di atas seluruhnya merupakan teks ulasan resensi buku sastra modern.", correct: false },
+          { id: "sin5", text: "Teks hibrida seperti ini menyalahi kaidah Bahasa Indonesia karena kurikulum melarang perpaduan genre tulisan.", correct: false }
+        ],
+        explanation: "Pilihan 1, 2, dan 3 tepat. Pembelajaran Bahasa Indonesia Kurikulum Merdeka mendorong literasi teks hibrida (multimodal). Teks di atas memadukan rekon (pengalaman masa lalu), deskripsi (keindahan visual alam), dan prosedur (protokol keselamatan daki)."
+      }
+    ];
+
+    /* APPLICATION STATE */
+    const State = {
+      student: { name: "", class: "", absen: "" },
+      currentLevelIdx: 0,
+      unlockedLevel: 1, // Berjenjang: level 1 terbuka, level selanjutnya terbuka jika tuntas atau dibuka paksa
+      scores: new Array(QUIZ_LEVELS.length).fill(0),
+      levelStatus: new Array(QUIZ_LEVELS.length).fill('locked'), // 'locked', 'unlocked', 'cleared', 'failed_skip'
+      levelAttempts: new Array(QUIZ_LEVELS.length).fill(0), // Jumlah percobaan per level (Maks 3 kali)
+      totalTimerSeconds: 20 * 60, // 20 Menit = 1200 detik
+      timerInterval: null,
+      timeElapsedSeconds: 0,
+      storageKey: 'kuis_bahasa_indonesia_buku_merdeka'
+    };
+
+    // DOM ELEMENTS
+    const screenWelcome = document.getElementById('screenWelcome');
+    const screenGame = document.getElementById('screenGame');
+    const screenResult = document.getElementById('screenResult');
+    const topQuizMeta = document.getElementById('topQuizMeta');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const currentScoreBadge = document.getElementById('currentScoreBadge');
+    const heartsContainer = document.getElementById('heartsContainer');
+    const levelBubblesContainer = document.getElementById('levelBubblesContainer');
+
+    const badgeGenre = document.getElementById('badgeGenre');
+    const badgeTypeName = document.getElementById('badgeTypeName');
+    const questionTitle = document.getElementById('questionTitle');
+    const stimulusContainer = document.getElementById('stimulusContainer');
+    const instructionText = document.getElementById('instructionText');
+    const interactiveWorkspace = document.getElementById('interactiveWorkspace');
+    const levelIndicatorText = document.getElementById('levelIndicatorText');
+    const feedbackPanel = document.getElementById('feedbackPanel');
+    const feedbackAlert = document.getElementById('feedbackAlert');
+    const btnCheckAnswer = document.getElementById('btnCheckAnswer');
+    const btnNextLevel = document.getElementById('btnNextLevel');
+    const btnForceNextLevel = document.getElementById('btnForceNextLevel');
+    const btnHint = document.getElementById('btnHint');
+
+    // Modals
+    const modalHistory = document.getElementById('modalHistory');
+    const historyListContainer = document.getElementById('historyListContainer');
+    const modalHint = document.getElementById('modalHint');
+    const modalHintText = document.getElementById('modalHintText');
+    const btnSoundToggle = document.getElementById('btnSoundToggle');
+    const soundIcon = document.getElementById('soundIcon');
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      initAudio();
+      renderLevelBubbles();
+      setupEventListeners();
+    });
+
+    function initAudio() {
+      document.body.addEventListener('click', () => {
+        AudioEngine.init();
+      }, { once: true });
+
+      btnSoundToggle.addEventListener('click', () => {
+        AudioEngine.enabled = !AudioEngine.enabled;
+        if (AudioEngine.enabled) {
+          soundIcon.className = "fa-solid fa-volume-high text-indigo-600";
+        } else {
+          soundIcon.className = "fa-solid fa-volume-xmark text-slate-400";
+        }
+      });
+    }
+
+    function setupEventListeners() {
+      // Form Mulai Kuis
+      document.getElementById('formStartQuiz').addEventListener('submit', (e) => {
+        e.preventDefault();
+        State.student.name = document.getElementById('studentName').value.trim();
+        State.student.class = document.getElementById('studentClass').value;
+        State.student.absen = document.getElementById('studentAbsen').value.trim();
+
+        if (!State.student.name || !State.student.class || !State.student.absen) return;
+
+        startQuiz();
+      });
+
+      // Tombol Periksa Jawaban
+      btnCheckAnswer.addEventListener('click', () => {
+        AudioEngine.playClick();
+        evaluateLevel();
+      });
+
+      // Tombol Level Berikutnya (Jika Jawaban Benar)
+      btnNextLevel.addEventListener('click', () => {
+        AudioEngine.playClick();
+        if (State.currentLevelIdx < QUIZ_LEVELS.length - 1) {
+          loadLevel(State.currentLevelIdx + 1);
+        } else {
+          finishQuiz();
+        }
+      });
+
+      // Tombol Buka Paksa & Lewati (Skenario 2 jika gagal 3x)
+      btnForceNextLevel.addEventListener('click', () => {
+        AudioEngine.playClick();
+        State.levelStatus[State.currentLevelIdx] = 'failed_skip';
+        State.scores[State.currentLevelIdx] = 0; // Skor hangus (0 poin)
+
+        // Buka gembok level berikutnya secara paksa
+        if (State.unlockedLevel <= State.currentLevelIdx + 1 && State.currentLevelIdx + 1 < QUIZ_LEVELS.length) {
+          State.unlockedLevel = State.currentLevelIdx + 2;
+          State.levelStatus[State.currentLevelIdx + 1] = 'unlocked';
+        }
+
+        if (State.currentLevelIdx < QUIZ_LEVELS.length - 1) {
+          loadLevel(State.currentLevelIdx + 1);
+        } else {
+          finishQuiz();
+        }
+      });
+
+      // Modal Bantuan / Hint
+      btnHint.addEventListener('click', () => {
+        const cur = QUIZ_LEVELS[State.currentLevelIdx];
+        modalHintText.textContent = cur.hint || "Bacalah stimulus dengan saksama dan teliti kata kunci.";
+        modalHint.classList.remove('hidden');
+      });
+      document.getElementById('btnCloseHint').addEventListener('click', () => modalHint.classList.add('hidden'));
+      document.getElementById('btnDismissHint').addEventListener('click', () => modalHint.classList.add('hidden'));
+
+      // Modal Riwayat LocalStorage
+      document.getElementById('btnOpenHistoryWelcome').addEventListener('click', openHistoryModal);
+      document.getElementById('btnOpenHistoryResult').addEventListener('click', openHistoryModal);
+      document.getElementById('btnCloseHistory').addEventListener('click', () => modalHistory.classList.add('hidden'));
+      document.getElementById('btnCloseHistoryFooter').addEventListener('click', () => modalHistory.classList.add('hidden'));
+      document.getElementById('btnClearHistory').addEventListener('click', clearHistory);
+
+      // Cetak Laporan PDF
+      document.getElementById('btnPrintReport').addEventListener('click', () => {
+        window.print();
+      });
+
+      // Mulai Sesi Baru
+      document.getElementById('btnRestartQuiz').addEventListener('click', () => {
+        location.reload();
+      });
+    }
+
+    // UPDATE TAMPILAN NYAWA (3 PELUANG)
+    function updateHeartsDisplay() {
+      const used = State.levelAttempts[State.currentLevelIdx] || 0;
+      const remaining = Math.max(0, 3 - used);
+      let html = "";
+      for (let i = 0; i < 3; i++) {
+        if (i < remaining) {
+          html += `<i class="fa-solid fa-heart text-rose-500"></i>`;
+        } else {
+          html += `<i class="fa-regular fa-heart text-slate-300"></i>`;
+        }
+      }
+      heartsContainer.innerHTML = html;
+    }
+
+    // MULAI KUIS
+    function startQuiz() {
+      screenWelcome.classList.add('hidden');
+      screenGame.classList.remove('hidden');
+      screenGame.classList.add('flex');
+      topQuizMeta.classList.remove('hidden');
+
+      State.levelStatus[0] = 'unlocked';
+      startMasterTimer();
+      loadLevel(0);
+    }
+
+    // MASTER TIMER 20 MENIT
+    function startMasterTimer() {
+      State.timerInterval = setInterval(() => {
+        State.totalTimerSeconds--;
+        State.timeElapsedSeconds++;
+
+        if (State.totalTimerSeconds <= 0) {
+          clearInterval(State.timerInterval);
+          finishQuiz(true); // Waktu Habis
+          return;
+        }
+
+        const mins = Math.floor(State.totalTimerSeconds / 60);
+        const secs = State.totalTimerSeconds % 60;
+        timerDisplay.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+
+        if (State.totalTimerSeconds <= 180) { // Sisa 3 menit warna merah
+          timerDisplay.parentElement.classList.remove('bg-amber-50', 'text-amber-900', 'border-amber-200');
+          timerDisplay.parentElement.classList.add('bg-rose-50', 'text-rose-700', 'border-rose-300', 'animate-pulse');
+        }
+      }, 1000);
+    }
+
+    // RENDER BADGE LEVEL 1-10 DI PETA KEMAJUAN
+    function renderLevelBubbles() {
+      levelBubblesContainer.innerHTML = '';
+      QUIZ_LEVELS.forEach((lvl, idx) => {
+        const bubble = document.createElement('button');
+        bubble.type = "button";
+        bubble.dataset.idx = idx;
+
+        let statusClass = "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed";
+        let iconHtml = `<i class="fa-solid fa-lock text-[10px]"></i>`;
+
+        if (State.levelStatus[idx] === 'cleared') {
+          statusClass = "bg-emerald-500 text-white border-emerald-600 shadow-sm";
+          iconHtml = `<i class="fa-solid fa-check text-xs"></i>`;
+        } else if (State.levelStatus[idx] === 'failed_skip') {
+          statusClass = "bg-rose-500 text-white border-rose-600 shadow-sm";
+          iconHtml = `<i class="fa-solid fa-xmark text-xs"></i>`;
+        } else if (idx === State.currentLevelIdx) {
+          statusClass = "bg-indigo-600 text-white ring-2 ring-indigo-400/50 border-indigo-700 shadow-md font-bold scale-105";
+          iconHtml = `<span>${idx + 1}</span>`;
+        } else if (idx < State.unlockedLevel) {
+          statusClass = "bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100 font-semibold";
+          iconHtml = `<span>${idx + 1}</span>`;
+        }
+
+        bubble.className = `h-9 sm:h-10 rounded-xl border flex items-center justify-center text-xs transition-all ${statusClass}`;
+        bubble.innerHTML = iconHtml;
+
+        // Boleh diklik jika level sudah terbuka sebelumnya
+        if (idx < State.unlockedLevel) {
+          bubble.addEventListener('click', () => {
+            loadLevel(idx);
+          });
+        }
+
+        levelBubblesContainer.appendChild(bubble);
+      });
+    }
+
+    function updateScoreBadge() {
+      const sum = State.scores.reduce((a, b) => a + b, 0);
+      currentScoreBadge.textContent = `${sum} Poin`;
+    }
+
+    // LOAD PERTANYAAN LEVEL
+    function loadLevel(idx) {
+      State.currentLevelIdx = idx;
+      const data = QUIZ_LEVELS[idx];
+
+      // Update Header Text & Stimulus
+      levelIndicatorText.textContent = `Level ${idx + 1} dari ${QUIZ_LEVELS.length}`;
+      badgeGenre.textContent = data.genre;
+      badgeTypeName.textContent = `• ${data.typeName}`;
+      questionTitle.textContent = data.title;
+      stimulusContainer.innerHTML = data.stimulus;
+      instructionText.innerHTML = data.instruction;
+
+      // Reset Button State & Feedback Panel
+      btnCheckAnswer.classList.remove('hidden');
+      btnNextLevel.classList.add('hidden');
+      btnForceNextLevel.classList.add('hidden');
+      feedbackPanel.classList.add('hidden');
+      feedbackAlert.innerHTML = "";
+
+      // Jika level ini sudah pernah cleared atau di-skip sebelumnya
+      if (State.levelStatus[idx] === 'cleared') {
+        btnCheckAnswer.classList.add('hidden');
+        btnNextLevel.classList.remove('hidden');
+        showFeedback(true, `Level ini telah Anda selesaikan dengan skor penuh 10 Poin. Pembahasan: ${data.explanation}`);
+      } else if (State.levelStatus[idx] === 'failed_skip') {
+        btnCheckAnswer.classList.add('hidden');
+        btnNextLevel.classList.remove('hidden');
+        showFeedback(false, `Level ini telah dilewati paksa dengan skor 0 Poin. Pembahasan: ${data.explanation}`, true);
+      }
+
+      updateHeartsDisplay();
+
+      // Render Dynamic Workspace Sesuai Tipe Interaksi
+      interactiveWorkspace.innerHTML = "";
+      switch (data.type) {
+        case 'mcma':
+          renderMCMA(data);
+          break;
+        case 'reorder':
+          renderReorder(data);
+          break;
+        case 'classify':
+          renderClassify(data);
+          break;
+        case 'fill_dropdown':
+          renderFillDropdown(data);
+          break;
+        case 'matching_sense':
+          renderMatchingSense(data);
+          break;
+        case 'detect_odd':
+          renderDetectOdd(data);
+          break;
+        case 'match_figures':
+          renderMatchFigures(data);
+          break;
+      }
+
+      renderLevelBubbles();
+      updateScoreBadge();
+    }
+
+    /* ========================================================
+     * KOMPONEN INTERAKTIF NON-PG WORKSPACE
+     * ======================================================== */
+    // 1. MCMA (Multiple Choice Multiple Answer)
+    function renderMCMA(data) {
+      const container = document.createElement('div');
+      container.className = "space-y-2.5";
+      data.options.forEach((opt) => {
+        const item = document.createElement('label');
+        item.className = "flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition cursor-pointer text-xs sm:text-sm";
+        item.innerHTML = `
+          <input type="checkbox" name="mcma_opt" value="${opt.id}" class="mt-1 w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+          <span class="text-slate-700 leading-relaxed">${opt.text}</span>
+        `;
+        container.appendChild(item);
+      });
+      interactiveWorkspace.appendChild(container);
+    }
+
+    // 2. REORDER / DRAG AND DROP LANGKAH PROSEDUR
+    function renderReorder(data) {
+      const container = document.createElement('div');
+      container.className = "space-y-2";
+      container.id = "reorderList";
+
+      data.initialOrder.forEach((step, idx) => {
+        const item = document.createElement('div');
+        item.className = "drag-item flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 bg-white hover:border-indigo-400 transition shadow-xs text-xs sm:text-sm";
+        item.draggable = true;
+        item.dataset.id = step.id;
+        item.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-6 h-6 rounded-lg bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center text-xs step-index">${idx + 1}</span>
+            <span class="text-slate-700 leading-relaxed">${step.text}</span>
+          </div>
+          <div class="flex items-center gap-1 text-slate-400 flex-shrink-0">
+            <button type="button" class="btn-move-up p-1.5 hover:text-indigo-600 hover:bg-slate-100 rounded-lg" title="Geser Naik"><i class="fa-solid fa-arrow-up text-xs"></i></button>
+            <button type="button" class="btn-move-down p-1.5 hover:text-indigo-600 hover:bg-slate-100 rounded-lg" title="Geser Turun"><i class="fa-solid fa-arrow-down text-xs"></i></button>
+            <i class="fa-solid fa-grip-vertical ml-1 text-slate-300"></i>
+          </div>
+        `;
+
+        // Mobile Friendly Arrow Move
+        item.querySelector('.btn-move-up').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const prev = item.previousElementSibling;
+          if (prev) {
+            container.insertBefore(item, prev);
+            updateStepIndices();
+          }
+        });
+        item.querySelector('.btn-move-down').addEventListener('click', (e) => {
+          e.stopPropagation();
+          const next = item.nextElementSibling;
+          if (next) {
+            container.insertBefore(next, item);
+            updateStepIndices();
+          }
+        });
+
+        // Desktop HTML5 Drag & Drop
+        item.addEventListener('dragstart', () => item.classList.add('opacity-40'));
+        item.addEventListener('dragend', () => {
+          item.classList.remove('opacity-40');
+          updateStepIndices();
+        });
+
+        container.appendChild(item);
+      });
+
+      container.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        const dragging = document.querySelector('.opacity-40');
+        const afterElement = getDragAfterElement(container, e.clientY);
+        if (afterElement == null) {
+          container.appendChild(dragging);
+        } else {
+          container.insertBefore(dragging, afterElement);
+        }
+      });
+
+      interactiveWorkspace.appendChild(container);
+
+      function updateStepIndices() {
+        container.querySelectorAll('.drag-item').forEach((el, i) => {
+          el.querySelector('.step-index').textContent = i + 1;
+        });
+      }
+    }
+
+    function getDragAfterElement(container, y) {
+      const draggableElements = [...container.querySelectorAll('.drag-item:not(.opacity-40)')];
+      return draggableElements.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if (offset < 0 && offset > closest.offset) {
+          return { offset: offset, element: child };
+        } else {
+          return closest;
+        }
+      }, { offset: Number.NEGATIVE_INFINITY }).element;
+    }
+
+    // 3. SORTIR KATEGORI (FAKTA VS OPINI)
+    function renderClassify(data) {
+      const container = document.createElement('div');
+      container.className = "space-y-3";
+
+      data.items.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = "p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm";
+        row.innerHTML = `
+          <p class="text-slate-700 leading-relaxed font-medium flex-1">${item.text}</p>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white cursor-pointer hover:border-indigo-400">
+              <input type="radio" name="classify_${item.id}" value="fakta" class="text-indigo-600 focus:ring-indigo-500">
+              <span class="text-xs font-semibold text-slate-700">Fakta Historis</span>
+            </label>
+            <label class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white cursor-pointer hover:border-indigo-400">
+              <input type="radio" name="classify_${item.id}" value="opini" class="text-indigo-600 focus:ring-indigo-500">
+              <span class="text-xs font-semibold text-slate-700">Opini Penulis</span>
+            </label>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      interactiveWorkspace.appendChild(container);
+    }
+
+    // 4. TEKS RUMPANG DROPDOWN KONJUNGSI
+    function renderFillDropdown(data) {
+      const container = document.createElement('div');
+      container.className = "grid grid-cols-1 sm:grid-cols-3 gap-3";
+
+      data.dropdowns.forEach((dp) => {
+        const box = document.createElement('div');
+        box.className = "p-3.5 rounded-xl border border-slate-200 bg-slate-50";
+        box.innerHTML = `
+          <label class="block text-xs font-bold text-slate-700 mb-2">${dp.label}</label>
+          <select id="${dp.id}" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-xs sm:text-sm font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            <option value="">-- Pilih Konjungsi --</option>
+            ${dp.options.map(o => `<option value="${o.val}">${o.text}</option>`).join('')}
+          </select>
+        `;
+        container.appendChild(box);
+      });
+
+      interactiveWorkspace.appendChild(container);
+    }
+
+    // 6. MATCHING CERAPAN PANCAINDRA
+    function renderMatchingSense(data) {
+      const container = document.createElement('div');
+      container.className = "space-y-3";
+
+      data.items.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = "p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs sm:text-sm";
+        row.innerHTML = `
+          <p class="text-slate-700 leading-relaxed italic font-serif flex-1">"${item.quote}"</p>
+          <div class="flex-shrink-0 w-full md:w-56">
+            <select id="sense_${item.id}" class="w-full p-2 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500">
+              <option value="">-- Pilih Cerapan Indra --</option>
+              ${data.senses.map(s => `<option value="${s.id}">${s.label}</option>`).join('')}
+            </select>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      interactiveWorkspace.appendChild(container);
+    }
+
+    // 7. DETEKSI KALIMAT SUMBANG (INTERACTIVE TOGGLE)
+    function renderDetectOdd(data) {
+      const container = document.createElement('div');
+      container.className = "space-y-2.5";
+
+      data.sentences.forEach((s) => {
+        const btn = document.createElement('button');
+        btn.type = "button";
+        btn.dataset.id = s.id;
+        btn.className = "sentence-odd-btn w-full text-left p-3.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition flex items-start gap-3 text-xs sm:text-sm";
+        btn.innerHTML = `
+          <span class="w-5 h-5 rounded-md border border-slate-300 flex items-center justify-center flex-shrink-0 check-indicator mt-0.5"></span>
+          <span class="text-slate-700 leading-relaxed">${s.text}</span>
+        `;
+
+        btn.addEventListener('click', () => {
+          btn.classList.toggle('selected-odd');
+          const isSelected = btn.classList.contains('selected-odd');
+          const indicator = btn.querySelector('.check-indicator');
+
+          if (isSelected) {
+            btn.classList.add('border-rose-400', 'bg-rose-50/70');
+            indicator.className = "w-5 h-5 rounded-md bg-rose-600 text-white flex items-center justify-center flex-shrink-0 check-indicator mt-0.5 text-xs";
+            indicator.innerHTML = `<i class="fa-solid fa-check"></i>`;
+          } else {
+            btn.classList.remove('border-rose-400', 'bg-rose-50/70');
+            indicator.className = "w-5 h-5 rounded-md border border-slate-300 flex items-center justify-center flex-shrink-0 check-indicator mt-0.5";
+            indicator.innerHTML = "";
+          }
+        });
+
+        container.appendChild(btn);
+      });
+
+      interactiveWorkspace.appendChild(container);
+    }
+
+    // 9. MATCH FIGURES / MAJAS
+    function renderMatchFigures(data) {
+      const container = document.createElement('div');
+      container.className = "space-y-3";
+
+      data.pairs.forEach((p) => {
+        const row = document.createElement('div');
+        row.className = "p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs sm:text-sm";
+        row.innerHTML = `
+          <p class="text-slate-700 italic font-serif flex-1">"${p.sentence}"</p>
+          <div class="flex-shrink-0 w-full sm:w-48">
+            <select id="fig_${p.id}" class="w-full p-2.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-indigo-500">
+              <option value="">-- Tentukan Majas --</option>
+              ${data.figureOptions.map(f => `<option value="${f}">${f}</option>`).join('')}
+            </select>
+          </div>
+        `;
+        container.appendChild(row);
+      });
+
+      interactiveWorkspace.appendChild(container);
+    }
+
+    /* ========================================================
+     * EVALUASI JAWABAN LEVEL (ATURAN SKENARIO 2 + 3 NYAWA)
+     * ======================================================== */
+    function evaluateLevel() {
+      const lvl = QUIZ_LEVELS[State.currentLevelIdx];
+      let isCorrect = false;
+
+      // 1. Validasi Jawaban sesuai tipe
+      switch (lvl.type) {
+        case 'mcma': {
+          const checked = Array.from(document.querySelectorAll('input[name="mcma_opt"]:checked')).map(el => el.value);
+          const correctIds = lvl.options.filter(o => o.correct).map(o => o.id);
+          const matched = checked.filter(id => correctIds.includes(id)).length;
+          const wrong = checked.filter(id => !correctIds.includes(id)).length;
+          isCorrect = (matched === correctIds.length && wrong === 0);
+          break;
+        }
+
+        case 'reorder': {
+          const items = Array.from(document.querySelectorAll('#reorderList .drag-item'));
+          const currentOrder = items.map(el => el.dataset.id);
+          isCorrect = currentOrder.every((key, i) => key === lvl.correctKeys[i]);
+          break;
+        }
+
+        case 'classify': {
+          let matches = 0;
+          lvl.items.forEach(it => {
+            const checked = document.querySelector(`input[name="classify_${it.id}"]:checked`);
+            if (checked && checked.value === it.category) matches++;
+          });
+          isCorrect = (matches === lvl.items.length);
+          break;
+        }
+
+        case 'fill_dropdown': {
+          let matches = 0;
+          lvl.dropdowns.forEach(dp => {
+            const val = document.getElementById(dp.id)?.value;
+            if (val === dp.correct) matches++;
+          });
+          isCorrect = (matches === lvl.dropdowns.length);
+          break;
+        }
+
+        case 'matching_sense': {
+          let matches = 0;
+          lvl.items.forEach(it => {
+            const val = document.getElementById(`sense_${it.id}`)?.value;
+            if (val === it.correct) matches++;
+          });
+          isCorrect = (matches === lvl.items.length);
+          break;
+        }
+
+        case 'detect_odd': {
+          const selected = Array.from(document.querySelectorAll('.sentence-odd-btn.selected-odd')).map(b => b.dataset.id);
+          const oddIds = lvl.sentences.filter(s => s.odd).map(s => s.id);
+          const matched = selected.filter(id => oddIds.includes(id)).length;
+          const wrong = selected.filter(id => !oddIds.includes(id)).length;
+          isCorrect = (matched === oddIds.length && wrong === 0);
+          break;
+        }
+
+        case 'match_figures': {
+          let matches = 0;
+          lvl.pairs.forEach(p => {
+            const val = document.getElementById(`fig_${p.id}`)?.value;
+            if (val === p.correct) matches++;
+          });
+          isCorrect = (matches === lvl.pairs.length);
+          break;
+        }
+      }
+
+      // 2. Eksekusi Mekanisme Skenario 2
+      if (isCorrect) {
+        // SUKSES
+        AudioEngine.playSuccess();
+        State.scores[State.currentLevelIdx] = 10; // 10 poin penuh
+        State.levelStatus[State.currentLevelIdx] = 'cleared';
+
+        // Buka gembok level berikutnya
+        if (State.unlockedLevel <= State.currentLevelIdx + 1 && State.currentLevelIdx + 1 < QUIZ_LEVELS.length) {
+          State.unlockedLevel = State.currentLevelIdx + 2;
+          State.levelStatus[State.currentLevelIdx + 1] = 'unlocked';
+        }
+
+        btnCheckAnswer.classList.add('hidden');
+        btnNextLevel.classList.remove('hidden');
+        btnForceNextLevel.classList.add('hidden');
+
+        showFeedback(true, `Luar biasa! Analisis Anda tepat dan valid (+10 Poin). Pembahasan: ${lvl.explanation}`);
+      } else {
+        // GAGAL
+        AudioEngine.playWrong();
+        State.levelAttempts[State.currentLevelIdx] = (State.levelAttempts[State.currentLevelIdx] || 0) + 1;
+        const attemptsUsed = State.levelAttempts[State.currentLevelIdx];
+        const sisaPeluang = 3 - attemptsUsed;
+
+        updateHeartsDisplay();
+
+        if (attemptsUsed >= 3) {
+          // NYAWA HABIS (3x Gagal) -> Skenario 2 Aktif
+          btnCheckAnswer.classList.add('hidden');
+          btnNextLevel.classList.add('hidden');
+          btnForceNextLevel.classList.remove('hidden');
+
+          showFeedback(false, `Peluang pada level ini telah habis (3 kali percobaan salah). Level ini mendapat skor 0 Poin. Silakan klik tombol di bawah untuk membuka paksa dan melanjutkan ke level berikutnya. Pembahasan: ${lvl.explanation}`, true);
+        } else {
+          // Masih ada kesempatan
+          showFeedback(false, `Analisis Anda belum sepenuhnya tepat. Masih tersisa ${sisaPeluang} kesempatan lagi. Cermati kembali instruksi teks lalu klik 'Periksa Analisis'.`);
+        }
+      }
+
+      renderLevelBubbles();
+      updateScoreBadge();
+    }
+
+    function showFeedback(isSuccess, message, isForced = false) {
+      feedbackPanel.classList.remove('hidden');
+      if (isSuccess) {
+        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm leading-relaxed flex items-start gap-3 bg-emerald-50 text-emerald-800 border border-emerald-200";
+        feedbackAlert.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600 text-lg mt-0.5 flex-shrink-0"></i><div><strong>Analisis Tepat!</strong><br>${message}</div>`;
+      } else if (isForced) {
+        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm leading-relaxed flex items-start gap-3 bg-rose-50 text-rose-800 border border-rose-200";
+        feedbackAlert.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600 text-lg mt-0.5 flex-shrink-0"></i><div><strong>Batas Percobaan Tercapai!</strong><br>${message}</div>`;
+      } else {
+        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm leading-relaxed flex items-start gap-3 bg-amber-50 text-amber-800 border border-amber-200";
+        feedbackAlert.innerHTML = `<i class="fa-solid fa-circle-xmark text-amber-600 text-lg mt-0.5 flex-shrink-0"></i><div><strong>Periksa Kembali:</strong><br>${message}</div>`;
+      }
+    }
+
+    /* ========================================================
+     * SELESAI KUIS & PENYIMPANAN KE LOCALSTORAGE
+     * ======================================================== */
+    function finishQuiz(isTimeOut = false) {
+      if (State.timerInterval) clearInterval(State.timerInterval);
+
+      screenGame.classList.add('hidden');
+      screenResult.classList.remove('hidden');
+      topQuizMeta.classList.add('hidden');
+
+      const totalScore = State.scores.reduce((a, b) => a + b, 0); // Maks 100
+      const clearedLevels = State.levelStatus.filter(s => s === 'cleared').length;
+      const skippedLevels = State.levelStatus.filter(s => s === 'failed_skip').length;
+
+      // Hitung Durasi Format
+      const m = Math.floor(State.timeElapsedSeconds / 60);
+      const s = State.timeElapsedSeconds % 60;
+      const formattedTime = `${m} Menit ${s} Detik`;
+
+      // Tentukan Predikat Literasi
+      let predikat = "Perlu Bimbingan";
+      if (totalScore >= 90) predikat = "Istimewa (Sangat Kritis)";
+      else if (totalScore >= 75) predikat = "Mahir Bernalar";
+      else if (totalScore >= 60) predikat = "Cakap";
+      else predikat = "Dasar / Perlu Remedial";
+
+      // Isi UI Hasil
+      document.getElementById('resStudentName').textContent = State.student.name;
+      document.getElementById('resStudentClass').textContent = State.student.class;
+      document.getElementById('resStudentAbsen').textContent = State.student.absen;
+      document.getElementById('resTimeSpent').textContent = isTimeOut ? `${formattedTime} (Waktu Habis)` : formattedTime;
+      document.getElementById('resFinalScore').textContent = totalScore;
+      document.getElementById('resClearedCount').textContent = `${clearedLevels}/10`;
+      document.getElementById('resSkippedCount').textContent = `${skippedLevels}/10`;
+      document.getElementById('resGrade').textContent = predikat;
+
+      // Buat Baris Tabel Rincian
+      const tbody = document.getElementById('resultTableBody');
+      tbody.innerHTML = '';
+      QUIZ_LEVELS.forEach((lvl, idx) => {
+        const tr = document.createElement('tr');
+        const st = State.levelStatus[idx];
+        const sc = State.scores[idx];
+        const att = State.levelAttempts[idx] || (st === 'cleared' ? 1 : 0);
+
+        let statusBadge = `<span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-500">Terkunci</span>`;
+        if (st === 'cleared') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-100 text-emerald-800">Tuntas</span>`;
+        } else if (st === 'failed_skip') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-100 text-rose-800">Hangus (0)</span>`;
+        }
+
+        tr.innerHTML = `
+          <td class="p-3 font-semibold text-slate-800">Level ${idx + 1}: ${lvl.title}</td>
+          <td class="p-3 text-slate-500">${lvl.genre}</td>
+          <td class="p-3 text-center text-slate-600">${att}x Coba</td>
+          <td class="p-3 text-center">${statusBadge}</td>
+          <td class="p-3 text-right font-bold ${sc > 0 ? 'text-indigo-700' : 'text-slate-400'}">${sc} Poin</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // SIMPAN DATA KE LOCALSTORAGE
+      saveToLocalStorage({
+        id: 'quiz_' + Date.now(),
+        timestamp: new Date().toLocaleString('id-ID'),
+        nama: State.student.name,
+        kelas: State.student.class,
+        absen: State.student.absen,
+        total_skor: totalScore,
+        durasi_detik: State.timeElapsedSeconds,
+        durasi_format: formattedTime,
+        tuntas: clearedLevels,
+        hangus: skippedLevels,
+        predikat: predikat,
+        level_details: QUIZ_LEVELS.map((lvl, idx) => ({
+          level: idx + 1,
+          genre: lvl.genre,
+          status: State.levelStatus[idx],
+          skor: State.scores[idx]
+        }))
+      });
+    }
+
+    function saveToLocalStorage(record) {
+      try {
+        let history = JSON.parse(localStorage.getItem(State.storageKey) || '[]');
+        history.unshift(record); // Data terbaru di paling atas
+        localStorage.setItem(State.storageKey, JSON.stringify(history));
+      } catch (err) {
+        console.error("Gagal menyimpan ke LocalStorage:", err);
+      }
+    }
+
+    /* ========================================================
+     * MODAL RIWAYAT LOCALSTORAGE & PENGELOLAAN DATA
+     * ======================================================== */
+    function openHistoryModal() {
+      renderHistoryList();
+      modalHistory.classList.remove('hidden');
+    }
+
+    function renderHistoryList() {
+      try {
+        const history = JSON.parse(localStorage.getItem(State.storageKey) || '[]');
+        if (history.length === 0) {
+          historyListContainer.innerHTML = `
+            <div class="text-center py-10 text-slate-400">
+              <i class="fa-regular fa-folder-open text-4xl mb-2 text-slate-300"></i>
+              <p class="text-xs sm:text-sm font-medium">Belum ada riwayat asesmen tersimpan di peramban ini.</p>
+            </div>
+          `;
+          return;
+        }
+
+        let html = '<div class="space-y-3">';
+        history.forEach((rec, idx) => {
+          html += `
+            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 hover:bg-white transition text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-6 h-6 rounded-lg bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs">${idx + 1}</span>
+                  <strong class="text-slate-800 text-sm sm:text-base">${rec.nama}</strong>
+                  <span class="px-2 py-0.5 rounded-md bg-slate-200 text-slate-700 font-semibold text-[11px]">${rec.kelas} (No. ${rec.absen})</span>
+                </div>
+                <div class="text-slate-500 text-xs flex items-center gap-3">
+                  <span><i class="fa-regular fa-clock text-slate-400 mr-1"></i>${rec.timestamp}</span>
+                  <span><i class="fa-solid fa-stopwatch text-slate-400 mr-1"></i>${rec.durasi_format}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between sm:justify-end gap-3 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-200">
+                <div class="text-right">
+                  <span class="text-xs text-slate-400 block">Total Nilai:</span>
+                  <span class="text-lg font-black text-indigo-700">${rec.total_skor} / 100</span>
+                </div>
+                <span class="px-2.5 py-1 rounded-lg text-xs font-bold ${rec.total_skor >= 75 ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                  ${rec.predikat}
+                </span>
+              </div>
+            </div>
+          `;
+        });
+        html += '</div>';
+        historyListContainer.innerHTML = html;
+      } catch (e) {
+        historyListContainer.innerHTML = `<div class="text-rose-500 text-xs p-4">Terjadi kesalahan membaca data penyimpanan.</div>`;
+      }
+    }
+
+    function clearHistory() {
+      const confirmBox = document.createElement('div');
+      confirmBox.className = "p-3 bg-rose-50 border border-rose-200 text-rose-800 rounded-xl text-xs mb-3 flex items-center justify-between";
+      confirmBox.innerHTML = `
+        <span>Yakin ingin menghapus seluruh rekaman nilai di perangkat ini?</span>
+        <button id="btnConfirmDelete" class="bg-rose-600 text-white font-bold px-3 py-1 rounded-lg hover:bg-rose-700">Ya, Hapus</button>
+      `;
+      historyListContainer.prepend(confirmBox);
+
+      document.getElementById('btnConfirmDelete').addEventListener('click', () => {
+        localStorage.removeItem(State.storageKey);
+        renderHistoryList();
+      });
+    }
+  </script>
+</body>
+</html>
