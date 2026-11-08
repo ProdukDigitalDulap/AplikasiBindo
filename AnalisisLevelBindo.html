@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lentera Bahasa: Asesmen HOTS 20 Level Kelas IX</title>
+  <title>Lentera Bahasa Pro: Asesmen HOTS 20 Level Kelas IX</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Google Fonts -->
@@ -12,23 +12,57 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
   <!-- FontAwesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  
+  <!-- SheetJS (xlsx) for Excel Export/Import -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <!-- jsPDF & html2canvas for PDF and Image Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- QR Code Generator -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eff6ff',
+              100: '#dbeafe',
+              500: '#3b82f6',
+              600: '#2563eb',
+              700: '#1d4ed8',
+            }
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    body { font-family: 'Inter', sans-serif; }
+    body { font-family: 'Inter', sans-serif; transition: background-color 0.3s, color 0.3s; }
     h1, h2, h3, h4, .font-heading { font-family: 'Plus Jakarta Sans', sans-serif; }
     .custom-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
     .custom-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 6px; }
     .custom-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 6px; }
-    
+    .dark .custom-scroll::-webkit-scrollbar-track { background: #1e293b; }
+    .dark .custom-scroll::-webkit-scrollbar-thumb { background: #475569; }
+
     .no-select {
       -webkit-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
       user-select: none;
     }
-    
+
     .drag-item { cursor: grab; user-select: none; }
     .drag-item:active { cursor: grabbing; }
+
+    /* Accessibility Font Scaler Classes */
+    .text-scale-sm { font-size: 0.875rem !important; }
+    .text-scale-base { font-size: 1rem !important; }
+    .text-scale-lg { font-size: 1.125rem !important; }
+    .text-scale-xl { font-size: 1.25rem !important; }
 
     @media print {
       body * { visibility: hidden; }
@@ -38,37 +72,53 @@
     }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col antialiased no-select">
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col antialiased no-select transition-colors duration-300">
 
   <!-- HEADER / TOP BAR -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 px-4 py-3 shadow-sm no-print">
+  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 sticky top-0 z-40 px-4 py-3 shadow-sm no-print">
     <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white shadow-md">
           <i class="fa-solid fa-brain text-lg"></i>
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold text-slate-800 leading-tight">Lentera Bahasa: Asesmen HOTS 20 Level</h1>
-          <p class="text-xs text-slate-500 font-medium">Bahasa Indonesia IX • Deskripsi, Prosedur & Rekon (Kurikulum Merdeka)</p>
+          <h1 class="text-base sm:text-lg font-bold text-slate-800 dark:text-white leading-tight">Lentera Bahasa Pro: IX HOTS</h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">Asesmen Deep Learning • Deskripsi, Rekon & Prosedur</p>
         </div>
       </div>
 
-      <!-- Live Meta Info -->
-      <div id="topQuizMeta" class="hidden flex items-center gap-2 sm:gap-4">
-        <div class="flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-900 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold">
-          <i class="fa-regular fa-clock text-amber-600"></i>
-          <span id="timerDisplay">35:00</span>
+      <!-- Live Meta Info & Universal Toolbar -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <div id="topQuizMeta" class="hidden flex items-center gap-2 sm:gap-3">
+          <div class="flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-semibold">
+            <i class="fa-regular fa-clock text-amber-600 dark:text-amber-400"></i>
+            <span id="timerDisplay">35:00</span>
+          </div>
+          <div class="flex items-center gap-1.5 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-indigo-900 dark:text-indigo-200 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold">
+            <i class="fa-solid fa-star text-amber-500"></i>
+            <span id="currentScoreBadge">0 Poin</span>
+          </div>
+          <div class="flex items-center gap-1.5 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800 text-rose-800 dark:text-rose-200 px-3 py-1.5 rounded-xl text-xs font-semibold">
+            <span id="heartsContainer" class="flex items-center gap-1 text-rose-500 text-sm">
+              <i class="fa-solid fa-heart"></i>
+              <i class="fa-solid fa-heart"></i>
+              <i class="fa-solid fa-heart"></i>
+            </span>
+          </div>
         </div>
-        <div class="flex items-center gap-1.5 bg-indigo-50 border border-indigo-200 text-indigo-900 px-3 py-1.5 rounded-xl text-xs sm:text-sm font-bold">
-          <i class="fa-solid fa-star text-amber-500"></i>
-          <span id="currentScoreBadge">0 Poin</span>
-        </div>
-        <div class="flex items-center gap-1.5 bg-rose-50 border border-rose-200 text-rose-800 px-3 py-1.5 rounded-xl text-xs font-semibold">
-          <span id="heartsContainer" class="flex items-center gap-1 text-rose-500 text-sm">
-            <i class="fa-solid fa-heart"></i>
-            <i class="fa-solid fa-heart"></i>
-            <i class="fa-solid fa-heart"></i>
-          </span>
+
+        <!-- Utility Moduls (Font Scaler, Dark Mode, Admin Access) -->
+        <div class="flex items-center gap-1.5 border-l border-slate-200 dark:border-slate-700 pl-3">
+          <button id="btnTextScale" type="button" title="Ubah Ukuran Teks (Aksesibilitas)" class="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-xs font-bold flex items-center gap-1">
+            <span class="text-xs">A</span><span class="text-base">A</span>
+          </button>
+          <button id="btnToggleTheme" type="button" title="Ganti Mode Gelap/Terang" class="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">
+            <i class="fa-solid fa-moon dark:hidden"></i>
+            <i class="fa-solid fa-sun hidden dark:inline text-amber-400"></i>
+          </button>
+          <button id="btnOpenTeacherPasscode" type="button" title="Portal Dashboard Guru" class="p-2 rounded-xl text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-slate-700">
+            <i class="fa-solid fa-user-shield text-base"></i>
+          </button>
         </div>
       </div>
     </div>
@@ -78,43 +128,49 @@
   <main class="flex-1 max-w-6xl w-full mx-auto p-4 sm:p-6 md:p-8 flex flex-col justify-center">
 
     <!-- WELCOME & REGISTRATION SCREEN -->
-    <section id="screenWelcome" class="max-w-xl w-full mx-auto bg-white rounded-3xl shadow-xl border border-slate-200 p-6 sm:p-8">
+    <section id="screenWelcome" class="max-w-xl w-full mx-auto bg-white dark:bg-slate-800 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-700 p-6 sm:p-8">
       <div class="text-center mb-6">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 text-indigo-700 font-semibold text-xs rounded-full mb-3 border border-indigo-100">
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 font-semibold text-xs rounded-full mb-3 border border-indigo-100 dark:border-indigo-800">
           <i class="fa-solid fa-shield-halved text-indigo-500"></i> Mode Asesmen Mandiri & Terproteksi
         </span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-2 font-heading">Uji Nalar Kritis 20 Level</h2>
-        <p class="text-sm text-slate-600 leading-relaxed">
-          Tantangan 20 level analitis berjenjang. Percobaan salah mengurangi bobot nilai maksimal per level. Opsi diacak otomatis untuk tiap siswa.
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white mb-2 font-heading">Uji Nalar Kritis 20 Level</h2>
+        <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+          Tantangan 20 level analitis berjenjang Kurikulum Merdeka (Kelas IX). Percobaan salah mengurangi bobot nilai maksimal per level.
         </p>
       </div>
 
       <div class="grid grid-cols-3 gap-2.5 text-center mb-6">
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-          <div class="text-indigo-600 font-bold text-lg"><i class="fa-solid fa-layer-group"></i> 20</div>
-          <div class="text-[11px] text-slate-500 font-medium">Level HOTS</div>
+        <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+          <div class="text-indigo-600 dark:text-indigo-400 font-bold text-lg"><i class="fa-solid fa-layer-group"></i> 20</div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Level HOTS</div>
         </div>
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-          <div class="text-amber-600 font-bold text-lg"><i class="fa-regular fa-stopwatch"></i> 35 Menit</div>
-          <div class="text-[11px] text-slate-500 font-medium">Batas Waktu</div>
+        <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+          <div class="text-amber-600 dark:text-amber-400 font-bold text-lg"><i class="fa-regular fa-stopwatch"></i> 35 Menit</div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Batas Waktu</div>
         </div>
-        <div class="bg-slate-50 p-3 rounded-2xl border border-slate-100">
-          <div class="text-rose-600 font-bold text-lg"><i class="fa-solid fa-heart-pulse"></i> 3 Nyawa</div>
-          <div class="text-[11px] text-slate-500 font-medium">Sistem Penalti</div>
+        <div class="bg-slate-50 dark:bg-slate-900/50 p-3 rounded-2xl border border-slate-100 dark:border-slate-700">
+          <div class="text-rose-600 dark:text-rose-400 font-bold text-lg"><i class="fa-solid fa-heart-pulse"></i> 3 Nyawa</div>
+          <div class="text-[11px] text-slate-500 dark:text-slate-400 font-medium">Sistem Penalti</div>
         </div>
       </div>
 
-      <!-- Form Identitas (9-A sampai 9-J) -->
+      <!-- Resume Notification Alert -->
+      <div id="resumeNotice" class="hidden mb-4 p-3 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 rounded-2xl text-xs text-indigo-900 dark:text-indigo-200 flex items-center justify-between">
+        <span><i class="fa-solid fa-rotate-left mr-1"></i> Terdeteksi sesi pengerjaan sebelumnya.</span>
+        <button id="btnResumeSession" type="button" class="font-bold underline text-indigo-600 dark:text-indigo-300">Lanjutkan Sesi</button>
+      </div>
+
+      <!-- Form Identitas -->
       <form id="formStartQuiz" class="space-y-4">
         <div>
-          <label for="studentName" class="block text-xs font-semibold uppercase text-slate-600 mb-1.5">Nama Lengkap Siswa</label>
-          <input type="text" id="studentName" required placeholder="Ketik nama lengkap..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:outline-none">
+          <label for="studentName" class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-300 mb-1.5">Nama Lengkap Siswa</label>
+          <input type="text" id="studentName" required placeholder="Ketik nama lengkap..." class="w-full px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label for="studentClass" class="block text-xs font-semibold uppercase text-slate-600 mb-1.5">Rombel / Kelas</label>
-            <select id="studentClass" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm bg-white focus:outline-none">
+            <label for="studentClass" class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-300 mb-1.5">Rombel / Kelas</label>
+            <select id="studentClass" required class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none">
               <option value="">Pilih Kelas...</option>
               <option value="9-A">Kelas 9-A</option>
               <option value="9-B">Kelas 9-B</option>
@@ -129,8 +185,8 @@
             </select>
           </div>
           <div>
-            <label for="studentAbsen" class="block text-xs font-semibold uppercase text-slate-600 mb-1.5">Nomor Absen</label>
-            <input type="number" id="studentAbsen" required min="1" max="50" placeholder="Contoh: 18" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none">
+            <label for="studentAbsen" class="block text-xs font-semibold uppercase text-slate-600 dark:text-slate-300 mb-1.5">Nomor Absen</label>
+            <input type="number" id="studentAbsen" required min="1" max="50" placeholder="Contoh: 18" class="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm focus:outline-none">
           </div>
         </div>
 
@@ -144,10 +200,10 @@
     <!-- GAMEPLAY SCREEN -->
     <section id="screenGame" class="hidden flex-col gap-5">
 
-      <div class="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex flex-col gap-3">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl p-4 border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col gap-3">
         <div class="flex items-center justify-between flex-wrap gap-2">
-          <span id="levelIndicatorText" class="text-xs font-bold bg-indigo-50 text-indigo-700 px-3 py-1 rounded-lg border border-indigo-200">Level 1 dari 20</span>
-          <div class="text-xs text-slate-500 flex items-center gap-3">
+          <span id="levelIndicatorText" class="text-xs font-bold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 px-3 py-1 rounded-lg border border-indigo-200 dark:border-indigo-800">Level 1 dari 20</span>
+          <div class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-3">
             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Tuntas</span>
             <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500"></span> Dibuka Paksa</span>
           </div>
@@ -156,7 +212,7 @@
         <div class="grid grid-cols-10 sm:grid-cols-20 gap-1" id="levelBubblesContainer"></div>
       </div>
 
-      <div class="bg-white rounded-2xl border border-slate-200 shadow-lg overflow-hidden flex flex-col">
+      <div class="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-lg overflow-hidden flex flex-col">
         <div class="bg-slate-900 text-white p-5 flex flex-wrap justify-between items-center gap-3">
           <div>
             <div class="flex items-center gap-2 mb-1">
@@ -173,32 +229,39 @@
           </div>
         </div>
 
-        <div class="p-5 border-b border-slate-100 bg-slate-50">
-          <div class="text-xs font-bold text-indigo-950 uppercase mb-2 flex items-center gap-2">
-            <i class="fa-solid fa-align-left text-indigo-600"></i> Stimulus Teks:
+        <div class="p-5 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40">
+          <div class="flex items-center justify-between mb-2">
+            <div class="text-xs font-bold text-indigo-950 dark:text-indigo-200 uppercase flex items-center gap-2">
+              <i class="fa-solid fa-align-left text-indigo-600 dark:text-indigo-400"></i> Stimulus Teks:
+            </div>
+            <!-- Modul Text-to-Speech (Audio Reader) -->
+            <button id="btnReadText" type="button" class="text-xs text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1 font-semibold">
+              <i class="fa-solid fa-volume-high"></i> Bacakan Teks
+            </button>
           </div>
-          <div id="stimulusContainer" class="p-4 bg-white rounded-xl border border-slate-200 text-sm leading-relaxed text-slate-700 custom-scroll max-h-64 overflow-y-auto"></div>
 
-          <div class="mt-4 flex items-start gap-2.5 text-xs text-slate-700 bg-indigo-50 p-3 rounded-xl border border-indigo-200">
-            <i class="fa-solid fa-circle-info text-indigo-600 mt-0.5"></i>
+          <div id="stimulusContainer" class="p-4 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 text-sm leading-relaxed text-slate-700 dark:text-slate-200 custom-scroll max-h-64 overflow-y-auto"></div>
+
+          <div class="mt-4 flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 bg-indigo-50/70 dark:bg-indigo-950/40 p-3 rounded-xl border border-indigo-200 dark:border-indigo-800">
+            <i class="fa-solid fa-circle-info text-indigo-600 dark:text-indigo-400 mt-0.5"></i>
             <div>
-              <strong class="text-indigo-900">Petunjuk Pengerjaan:</strong>
+              <strong class="text-indigo-900 dark:text-indigo-200">Petunjuk Pengerjaan:</strong>
               <span id="instructionText">Lakukan analisis dan jawab dengan cermat.</span>
             </div>
           </div>
         </div>
 
-        <div class="p-5 flex-1 bg-white">
+        <div class="p-5 flex-1 bg-white dark:bg-slate-800">
           <div id="interactiveWorkspace"></div>
         </div>
 
-        <div id="feedbackPanel" class="hidden px-5 py-4 border-t">
+        <div id="feedbackPanel" class="hidden px-5 py-4 border-t dark:border-slate-700">
           <div id="feedbackAlert" class="rounded-xl p-4 text-xs sm:text-sm leading-relaxed flex items-start gap-3"></div>
         </div>
 
-        <div class="p-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3">
-          <button id="btnHint" type="button" class="text-xs text-slate-600 font-semibold flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-slate-200 transition">
-            <i class="fa-regular fa-lightbulb text-amber-500"></i> Petunjuk HOTS
+        <div class="p-4 bg-slate-50 dark:bg-slate-900/60 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between gap-3">
+          <button id="btnHint" type="button" class="text-xs text-slate-600 dark:text-slate-300 font-semibold flex items-center gap-1.5 px-3 py-2 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-700 transition">
+            <i class="fa-regular fa-lightbulb text-amber-500"></i> Kiat HOTS
           </button>
 
           <div class="flex items-center gap-2">
@@ -218,45 +281,51 @@
 
     <!-- RESULT SCREEN -->
     <section id="screenResult" class="hidden max-w-3xl w-full mx-auto">
-      <div id="printArea" class="bg-white rounded-3xl border border-slate-200 shadow-2xl p-6 sm:p-10 text-center">
-        <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center text-3xl mb-4">
+      <div id="printArea" class="bg-white dark:bg-slate-800 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl p-6 sm:p-10 text-center">
+        <div class="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-3xl mb-4">
           <i class="fa-solid fa-award"></i>
         </div>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 mb-1 font-heading">Laporan Asesmen HOTS 20 Level</h2>
-        <p class="text-xs text-slate-500 mb-6">Hasil Uji Nalar Kritis Mandiri • Bahasa Indonesia Kelas IX</p>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-800 dark:text-white mb-1 font-heading">Laporan Asesmen HOTS 20 Level</h2>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Hasil Uji Nalar Kritis Mandiri • Bahasa Indonesia Kelas IX (Kurikulum Merdeka)</p>
 
-        <div class="bg-slate-50 rounded-2xl p-4 mb-6 border border-slate-200 grid grid-cols-2 sm:grid-cols-4 gap-3 text-left text-xs">
-          <div><span class="text-slate-400 block font-semibold">NAMA SISWA</span><span id="resStudentName" class="font-bold text-slate-800">-</span></div>
-          <div><span class="text-slate-400 block font-semibold">KELAS</span><span id="resStudentClass" class="font-bold text-slate-800">-</span></div>
-          <div><span class="text-slate-400 block font-semibold">ABSEN</span><span id="resStudentAbsen" class="font-bold text-slate-800">-</span></div>
-          <div><span class="text-slate-400 block font-semibold">WAKTU TEMPUH</span><span id="resTimeSpent" class="font-bold text-indigo-700">-</span></div>
+        <div class="bg-slate-50 dark:bg-slate-900/50 rounded-2xl p-4 mb-6 border border-slate-200 dark:border-slate-700 grid grid-cols-2 sm:grid-cols-4 gap-3 text-left text-xs">
+          <div><span class="text-slate-400 block font-semibold">NAMA SISWA</span><span id="resStudentName" class="font-bold text-slate-800 dark:text-slate-100">-</span></div>
+          <div><span class="text-slate-400 block font-semibold">KELAS</span><span id="resStudentClass" class="font-bold text-slate-800 dark:text-slate-100">-</span></div>
+          <div><span class="text-slate-400 block font-semibold">ABSEN</span><span id="resStudentAbsen" class="font-bold text-slate-800 dark:text-slate-100">-</span></div>
+          <div><span class="text-slate-400 block font-semibold">WAKTU TEMPUH</span><span id="resTimeSpent" class="font-bold text-indigo-700 dark:text-indigo-300">-</span></div>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-          <div class="p-4 rounded-2xl bg-indigo-50 border border-indigo-100">
-            <span class="text-[11px] text-indigo-600 font-semibold block uppercase">Total Skor</span>
-            <span id="resFinalScore" class="text-2xl font-extrabold text-indigo-900 block">0</span>
+          <div class="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900">
+            <span class="text-[11px] text-indigo-600 dark:text-indigo-300 font-semibold block uppercase">Total Skor</span>
+            <span id="resFinalScore" class="text-2xl font-extrabold text-indigo-900 dark:text-indigo-100 block">0</span>
             <span class="text-[10px] text-indigo-500">Maksimal 200 Poin</span>
           </div>
-          <div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-100">
-            <span class="text-[11px] text-emerald-600 font-semibold block uppercase">Tuntas</span>
-            <span id="resClearedCount" class="text-2xl font-extrabold text-emerald-900 block">0/20</span>
+          <div class="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-900">
+            <span class="text-[11px] text-emerald-600 dark:text-emerald-300 font-semibold block uppercase">Tuntas</span>
+            <span id="resClearedCount" class="text-2xl font-extrabold text-emerald-900 dark:text-emerald-100 block">0/20</span>
           </div>
-          <div class="p-4 rounded-2xl bg-rose-50 border border-rose-100">
-            <span class="text-[11px] text-rose-600 font-semibold block uppercase">Dibuka Paksa</span>
-            <span id="resSkippedCount" class="text-2xl font-extrabold text-rose-900 block">0/20</span>
+          <div class="p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900">
+            <span class="text-[11px] text-rose-600 dark:text-rose-300 font-semibold block uppercase">Dibuka Paksa</span>
+            <span id="resSkippedCount" class="text-2xl font-extrabold text-rose-900 dark:text-rose-100 block">0/20</span>
           </div>
-          <div class="p-4 rounded-2xl bg-amber-50 border border-amber-100">
-            <span class="text-[11px] text-amber-700 font-semibold block uppercase">Predikat</span>
-            <span id="resGrade" class="text-xs font-extrabold text-amber-900 mt-1 block">-</span>
+          <div class="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-100 dark:border-amber-900">
+            <span class="text-[11px] text-amber-700 dark:text-amber-300 font-semibold block uppercase">Predikat</span>
+            <span id="resGrade" class="text-xs font-extrabold text-amber-900 dark:text-amber-100 mt-1 block">-</span>
           </div>
         </div>
 
+        <!-- Verification QR Code Container -->
+        <div class="mb-6 flex flex-col items-center justify-center p-3 bg-slate-50 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-700">
+          <div id="qrcodeContainer" class="p-2 bg-white rounded-lg shadow-sm mb-2"></div>
+          <span class="text-[10px] text-slate-400">Kode Otentikasi Laporan Resmi</span>
+        </div>
+
         <div class="text-left mb-6">
-          <h4 class="font-bold text-slate-800 text-xs mb-2">Rincian Capaian Tiap Level:</h4>
-          <div class="overflow-x-auto border border-slate-200 rounded-xl max-h-60 custom-scroll">
+          <h4 class="font-bold text-slate-800 dark:text-slate-100 text-xs mb-2">Rincian Capaian Tiap Level:</h4>
+          <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl max-h-60 custom-scroll">
             <table class="w-full text-xs text-left">
-              <thead class="bg-slate-100 text-slate-600 font-semibold">
+              <thead class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-200 font-semibold">
                 <tr>
                   <th class="p-2.5">Level</th>
                   <th class="p-2.5">Genre</th>
@@ -264,16 +333,19 @@
                   <th class="p-2.5 text-right">Skor</th>
                 </tr>
               </thead>
-              <tbody id="resultTableBody" class="divide-y divide-slate-100"></tbody>
+              <tbody id="resultTableBody" class="divide-y divide-slate-100 dark:divide-slate-700"></tbody>
             </table>
           </div>
         </div>
 
-        <div class="flex flex-wrap items-center justify-center gap-3 no-print">
-          <button id="btnPrintReport" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition">
-            <i class="fa-solid fa-print mr-1"></i> Cetak Laporan PDF
+        <div class="flex flex-wrap items-center justify-center gap-2.5 no-print">
+          <button id="btnPrintReport" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+            <i class="fa-solid fa-print"></i> Cetak PDF
           </button>
-          <button onclick="location.reload()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-5 py-2.5 rounded-xl text-xs transition">
+          <button id="btnDownloadPNG" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition flex items-center gap-1.5">
+            <i class="fa-solid fa-image"></i> Unduh PNG
+          </button>
+          <button onclick="location.reload()" class="bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-bold px-4 py-2 rounded-xl text-xs transition">
             Sesi Baru
           </button>
         </div>
@@ -282,15 +354,87 @@
 
   </main>
 
-  <!-- MODAL HINT -->
+  <!-- MODAL HINT (KIAT HOTS) -->
   <div id="modalHint" class="hidden fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-4 no-print">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700">
       <div class="flex items-center justify-between mb-3">
-        <span class="text-base font-bold text-amber-600"><i class="fa-solid fa-lightbulb"></i> Kiat HOTS</span>
-        <button id="btnCloseHint" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark"></i></button>
+        <span class="text-base font-bold text-amber-600 dark:text-amber-400 flex items-center gap-2">
+          <i class="fa-solid fa-lightbulb"></i> Kiat HOTS
+        </span>
+        <button id="btnCloseHint" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark"></i></button>
       </div>
-      <p id="modalHintText" class="text-xs sm:text-sm text-slate-600 leading-relaxed mb-4"></p>
-      <button id="btnDismissHint" class="w-full bg-slate-900 text-white font-semibold py-2 rounded-xl text-xs">Saya Paham</button>
+      <p id="modalHintText" class="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed mb-4"></p>
+      <!-- Glossarium Popup Panel Inside Hint -->
+      <div id="glossaryPanel" class="hidden mb-4 p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-[11px] text-amber-900 dark:text-amber-200">
+        <strong>Glosarium Istilah:</strong>
+        <p id="glossaryText" class="mt-1 leading-snug"></p>
+      </div>
+      <button id="btnDismissHint" class="w-full bg-slate-900 dark:bg-indigo-600 text-white font-semibold py-2 rounded-xl text-xs">Saya Paham</button>
+    </div>
+  </div>
+
+  <!-- MODAL PORTAL DASHBOARD GURU -->
+  <div id="modalTeacherPasscode" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+    <div class="bg-white dark:bg-slate-800 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 text-center">
+      <div class="w-12 h-12 rounded-full bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 flex items-center justify-center text-xl mx-auto mb-3">
+        <i class="fa-solid fa-lock"></i>
+      </div>
+      <h3 class="font-bold text-slate-800 dark:text-white text-base mb-1">Otentikasi Guru</h3>
+      <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Masukkan passcode untuk mengkases dasbor rekapitulasi nilai dan pengelola bank soal.</p>
+      <input type="password" id="teacherPasscodeInput" placeholder="Masukkan passcode..." class="w-full px-3 py-2 text-center rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-sm mb-4 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+      <div class="flex items-center gap-2">
+        <button id="btnCancelPasscode" type="button" class="w-1/2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-semibold py-2 rounded-xl text-xs">Batal</button>
+        <button id="btnSubmitPasscode" type="button" class="w-1/2 bg-indigo-600 text-white font-semibold py-2 rounded-xl text-xs">Masuk Portal</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL DASHBOARD GURU & ANALITIK -->
+  <div id="modalTeacherDashboard" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4 no-print">
+    <div class="bg-white dark:bg-slate-800 rounded-3xl max-w-4xl w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-700 max-h-[90vh] flex flex-col">
+      <div class="flex items-center justify-between pb-4 border-b dark:border-slate-700">
+        <div>
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg font-heading">Dashboard Analitik & Pengelola Bank Soal</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Rekapitulasi Capaian Kelas & Impor/Ekspor Bank Soal JSON/Excel</p>
+        </div>
+        <button id="btnCloseTeacherDash" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="py-4 flex-1 overflow-y-auto custom-scroll space-y-6">
+        <!-- Action Toolbar -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button id="btnExportJSON" class="p-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-xl text-xs font-bold text-indigo-700 dark:text-indigo-300 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-export"></i> Ekspor Bank Soal JSON
+          </button>
+          <label class="p-3 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-300 flex items-center justify-center gap-2 cursor-pointer">
+            <i class="fa-solid fa-file-import"></i> Impor Soal JSON
+            <input type="file" id="inputImportJSON" accept=".json" class="hidden">
+          </label>
+          <button id="btnExportClassExcel" class="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-xs font-bold text-amber-800 dark:text-amber-200 flex items-center justify-center gap-2">
+            <i class="fa-solid fa-file-excel"></i> Ekspor Hasil Kelas (.xlsx)
+          </button>
+        </div>
+
+        <!-- Leaderboard Section -->
+        <div>
+          <h4 class="font-bold text-xs uppercase text-slate-500 dark:text-slate-400 mb-2">Papan Peringkat Sesi Ini (Leaderboard)</h4>
+          <div class="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-xl">
+            <table class="w-full text-xs text-left">
+              <thead class="bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300">
+                <tr>
+                  <th class="p-2">Posisi</th>
+                  <th class="p-2">Nama Siswa</th>
+                  <th class="p-2">Kelas</th>
+                  <th class="p-2 text-right">Skor Total</th>
+                </tr>
+              </thead>
+              <tbody id="leaderboardBody" class="divide-y divide-slate-100 dark:divide-slate-700">
+                <tr><td colspan="4" class="p-3 text-center text-slate-400">Belum ada data pengerjaan tersimpan.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -316,240 +460,260 @@
     }
 
     /* ========================================================
-     * DATABASE 20 LEVEL HOTS (KELAS IX MERDEKA)
+     * DATABASE 20 LEVEL HOTS (KELAS IX MERDEKA DEEP LEARNING)
      * ======================================================== */
-    const QUIZ_LEVELS = [
+    let QUIZ_LEVELS = [
       {
-        id: 1, title: "Kaidah Teks Deskripsi Spasial", genre: "Teks Deskripsi", type: "mcma", points: 10,
-        hint: "Cari kata konkret indrawi dan majas pembanding.",
-        stimulus: "<p class='italic font-serif bg-amber-50 p-3 rounded-xl'>'Gugusan tebing karang di Pantai Karang Gigi Hiu mencuat runcing menyerupai deretan taring tajam predator purba. Deburan ombak bergemuruh garang...'</p>",
-        instruction: "Centang 3 pernyataan kaidah yang BENAR!",
+        id: 1, title: "Diksi Konotatif & Atmosphere Deskripsi Keluarga", genre: "Teks Deskripsi", type: "mcma", points: 10,
+        hint: "Cari kata berasosiasi rasa hangat dan ungkapan kiasan kekeluargaan.",
+        glossary: "Diksi Konotatif: Kata yang memiliki makna tambahan/asosiatif di luar makna kamus.",
+        stimulus: "<p class='italic font-serif bg-amber-50 dark:bg-amber-950/30 p-3.5 rounded-xl border border-amber-200 dark:border-amber-800 text-amber-950 dark:text-amber-100'>'Di sudut ruang tamu tua itu, Ayah selalu menjadi tiang penyangga yang teduh. Tangannya yang kasar oleh guratan zaman senantiasa mendekap dinginnya keraguan kami. Senyum Ibu adalah telaga jernih tempat segala amarah meleleh...'</p>",
+        instruction: "Pilihlah 3 pernyataan analisis kaidah kebahasaan deskripsi yang BENAR!",
         options: [
-          { id: "o1", text: "Menggunakan kata konkret spesifik merangsang multisensori.", correct: true },
-          { id: "o2", text: "Memanfaatkan majas perumpamaan (simile/asosiasi).", correct: true },
-          { id: "o3", text: "Didominasi kalimat instruksi langkah kerja runtut.", correct: false },
-          { id: "o4", text: "Menggunakan kata sifat indrawi seperti 'runcing' dan 'garang'.", correct: true }
+          { id: "o1", text: "Menggunakan diksi konotatif 'tiang penyangga' untuk menggambarkan peran pelindung Ayah.", correct: true },
+          { id: "o2", text: "Memanfaatkan metafora 'telaga jernih' untuk melukiskan ketenangan sikap Ibu.", correct: true },
+          { id: "o3", text: "Didominasi oleh istilah teknis ilmiah kedokteran dan fisika kuantum.", correct: false },
+          { id: "o4", text: "Menggunakan cerapan perabaan 'kasar oleh guratan' dan 'dinginnya keraguan'.", correct: true }
         ],
-        explanation: "Pernyataan 1, 2, dan 4 benar sesuai kaidah deskripsi fisik."
+        explanation: "Pernyataan 1, 2, dan 4 benar sesuai kaidah deskripsi emosional-spasial keluarga."
       },
       {
-        id: 2, title: "Urutan Logis Prosedur Kompleks", genre: "Teks Prosedur", type: "reorder", points: 10,
-        hint: "Cacah bahan dulu sebelum pencampuran media cairan.",
-        stimulus: "<p>Urutkan pembuatan Pupuk Organik Cair berikut agar fermentasi tidak gagal.</p>",
-        instruction: "Urutkan ke-5 langkah berikut dari awal ke akhir!",
+        id: 2, title: "Urutan Logis Prosedur Pengolahan Sampah Rumah Tangga", genre: "Teks Prosedur", type: "reorder", points: 10,
+        hint: "Pilah jenis limbah terlebih dahulu sebelum tahap komposting.",
+        glossary: "Komposting: Proses penguraian bahan organik secara biologis menjadi pupuk.",
+        stimulus: "<p>Urutkan langkah pengelolaan limbah organik keluarga agar tidak memicu pembusukan berbau!</p>",
+        instruction: "Urutkan ke-5 langkah prosedur dari tahap awal hingga akhir!",
         initialOrder: [
-          { id: "s3", text: "Tutup rapat wadah ember kedap udara selama 14 hari.", orderKey: 4 },
-          { id: "s1", text: "Cacah halus 2 kg sisa kulit buah.", orderKey: 1 },
-          { id: "s5", text: "Saring cairan hasil fermentasi dengan kain tipis.", orderKey: 5 },
-          { id: "s2", text: "Campurkan 50ml molase ke dalam 5 liter air.", orderKey: 2 },
-          { id: "s4", text: "Masukkan cacahan buah ke dalam larutan bioaktivator.", orderKey: 3 }
+          { id: "s3", text: "Tutup rapat komposter dan tempatkan di area bersirkulasi udara baik.", orderKey: 4 },
+          { id: "s1", text: "Pilah sisa makanan dapur organik dari sisa plastik atau anorganik.", orderKey: 1 },
+          { id: "s5", text: "Panen pupuk kompos matang setelah 3-4 minggu fermentasi.", orderKey: 5 },
+          { id: "s2", text: "Cacah sisa sayuran dan sisa buah menjadi ukuran lebih kecil (2-3 cm).", orderKey: 2 },
+          { id: "s4", text: "Campurkan cacahan organik dengan bioaktivator cairan molase.", orderKey: 3 }
         ],
         correctKeys: ["s1", "s2", "s4", "s3", "s5"],
-        explanation: "Cacah -> Larutkan Molase -> Campur -> Fermentasi -> Saring."
+        explanation: "Pilah -> Cacah -> Campur Bioaktivator -> Fermentasi Tutup Rapat -> Panen Kompos."
       },
       {
-        id: 3, title: "Fakta vs Opini Teks Rekon Sejarah", genre: "Teks Rekon", type: "classify", points: 10,
-        hint: "Fakta memuat tanggal/dokumen; opini memuat asumsi/penilaian.",
-        stimulus: "<p class='bg-blue-50 p-3 rounded-xl text-xs'>'Kartini lahir 21 April 1879. Kumpulan suratnya diterbitkan Abendanon sebagai bukti tiada tandingnya keberanian beliau. Tanpa surat itu emansipasi mungkin tertinggal setengah abad.'</p>",
-        instruction: "Kelompokkan fakta dan opini penulis!",
+        id: 3, title: "Evaluasi Fakta vs Opini Teks Rekon Otobiografi", genre: "Teks Rekon", type: "classify", points: 10,
+        hint: "Fakta ditandai data kuantitatif/tanggal; opini berisi impresi subjektif.",
+        glossary: "Rekon Otobiografi: Teks cerita ulang mengenai pengalaman hidup yang ditulis sendiri oleh pelakunya.",
+        stimulus: "<p class='bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl text-xs'>'Saya lahir di Garut pada 14 Maret 2009. Kepindahan keluarga kami ke Bandung tahun 2018 adalah keputusan terbaik Ayah yang menyelamatkan masa depan pendidikan kami. Di sekolah baru, saya meraih Juara 1 OSN Bahasa Indonesia tahun 2024.'</p>",
+        instruction: "Kelompokkan pernyataan fakta dan opini penulis!",
         items: [
-          { id: "c1", text: "Kartini lahir di Jepara 21 April 1879.", category: "fakta" },
-          { id: "c2", text: "Bukti tiada tandingnya keberanian pemikiran beliau.", category: "opini" },
-          { id: "c3", text: "J.H. Abendanon menerbitkan buku kumpulan surat.", category: "fakta" },
-          { id: "c4", text: "Emansipasi wanita akan tertinggal 50 tahun.", category: "opini" }
+          { id: "c1", text: "Penulis lahir di Garut pada 14 Maret 2009.", category: "fakta" },
+          { id: "c2", text: "Kepindahan ke Bandung adalah keputusan terbaik Ayah.", category: "opini" },
+          { id: "c3", text: "Keluarga penulis pindah ke kota Bandung pada tahun 2018.", category: "fakta" },
+          { id: "c4", text: "Piala OSN tersebut merupakan bukti kejeniusan mutlak penulis.", category: "opini" }
         ],
-        explanation: "Tanggal/penerbitan = fakta. Penilaian 'tiada tandingnya' = opini."
+        explanation: "Tanggal/tempat/penghargaan = Fakta. Penilaian 'keputusan terbaik' & 'kejeniusan mutlak' = Opini."
       },
       {
-        id: 4, title: "Kohesi Konjungsi Temporal Rekon", genre: "Teks Rekon", type: "fill_dropdown", points: 10,
-        hint: "Pilih kata hubung kronologis yang logis.",
-        stimulus: "<p>Tepat pukul 08.00 kami tiba. [Bagian 1] membeli tiket, kami masuk. [Bagian 2], kami menuju sayap timur. [Bagian 3] acara usai, kami berfoto.</p>",
-        instruction: "Lengkapi rumpang konjungsi berikut!",
+        id: 4, title: "Kohesi Konjungsi Temporal Rekon Perjalanan", genre: "Teks Rekon", type: "fill_dropdown", points: 10,
+        hint: "Pilih kata hubung penanda alur kronologis waktu yang presisi.",
+        glossary: "Konjungsi Temporal: Kata penghubung yang menyatakan urutan waktu terjadinya peristiwa.",
+        stimulus: "<p>Tepat pukul 06.00 WIB keluarga kami berangkat dari rumah. [Bagian 1] menempuh perjalanan 3 jam, kami tiba di tempat penangkaran. [Bagian 2], petugas memberikan pengarahan keselamatan. [Bagian 3] hujan deras turun, kami sudah berkumpul di dalam bus kembali.</p>",
+        instruction: "Lengkapi bagian rumpang konjungsi temporal berikut!",
         dropdowns: [
           { id: "d1", label: "[Bagian 1]", options: [{val:"Setelah", text:"Setelah"}, {val:"Sehingga", text:"Sehingga"}], correct: "Setelah" },
-          { id: "d2", label: "[Bagian 2]", options: [{val:"Selanjutnya", text:"Selanjutnya"}, {val:"Padahal", text:"Padahal"}], correct: "Selanjutnya" },
+          { id: "d2", label: "[Bagian 2]", options: [{val:"Kemudian", text:"Kemudian"}, {val:"Meskipun", text:"Meskipun"}], correct: "Kemudian" },
           { id: "d3", label: "[Bagian 3]", options: [{val:"Sebelum", text:"Sebelum"}, {val:"Sebab", text:"Sebab"}], correct: "Sebelum" }
         ],
-        explanation: "Setelah, Selanjutnya, dan Sebelum membentuk alur runtut."
+        explanation: "Setelah, Kemudian, dan Sebelum membentuk rantai peristiwa yang logis."
       },
       {
-        id: 5, title: "Ragam Kalimat Imperatif Teknis", genre: "Teks Prosedur", type: "mcma", points: 10,
-        hint: "Kalimat imperatif ditandai verba perintah langsung.",
-        stimulus: "<p>(1) Cabut steker! (2) Mari hemat listrik! (3) Bersihkan AC berkala! (4) Aturlah suhu 24°C!</p>",
+        id: 5, title: "Analisis Ragam Kalimat Imperatif Teknis Prosedur", genre: "Teks Prosedur", type: "mcma", points: 10,
+        hint: "Imperatif teknis memuat kata kerja perintah lugas berspesifikasi ukuran.",
+        glossary: "Imperatif Teknis: Instruksi kerja langsung yang memuat batasan teknis tertentu.",
+        stimulus: "<p>(1) Tekan tombol power selama 3 detik! (2) Betapa indahnya pemandangan ini! (3) Bersihkan katup udara secara berkala! (4) Tuangkan 250 ml larutan disinfektan ke dalam tangki!</p>",
         instruction: "Pilihlah 3 kalimat yang tergolong IMPERATIF TEKNIS!",
         options: [
-          { id: "i1", text: "Kalimat (1): Cabut steker...", correct: true },
-          { id: "i2", text: "Kalimat (2): Mari hemat...", correct: false },
-          { id: "i3", text: "Kalimat (3): Bersihkan AC...", correct: true },
-          { id: "i4", text: "Kalimat (4): Aturlah suhu...", correct: true }
+          { id: "i1", text: "Kalimat (1): Tekan tombol power selama 3 detik...", correct: true },
+          { id: "i2", text: "Kalimat (2): Betapa indahnya pemandangan...", correct: false },
+          { id: "i3", text: "Kalimat (3): Bersihkan katup udara secara berkala...", correct: true },
+          { id: "i4", text: "Kalimat (4): Tuangkan 250 ml larutan disinfektan...", correct: true }
         ],
-        explanation: "Kalimat 1, 3, dan 4 mengandung verba perintah langsung."
+        explanation: "Kalimat 1, 3, dan 4 mengandung verba perintah instruksional teknis."
       },
       {
-        id: 6, title: "Cerapan Pancaindra Deskripsi", genre: "Teks Deskripsi", type: "matching_sense", points: 10,
-        hint: "Sesuaikan klausa dengan indra manusia.",
-        stimulus: "<p>Cocokkan kalimat dengan citraan indra yang tepat.</p>",
-        instruction: "Pasangkan deskripsi berikut dengan citraan indranya!",
+        id: 6, title: "Cerapan Pancaindra Deskripsi Ruang Keluarga", genre: "Teks Deskripsi", type: "matching_sense", points: 10,
+        hint: "Hubungkan klausa deskriptif dengan indra pengenal manusia.",
+        glossary: "Citraan Indra: Kata/frasa yang merangsang imajinasi indrawi pembaca.",
+        stimulus: "<p>Pasangkan kutipan kalimat deskripsi suasana rumah dengan citraan indra yang tepat!</p>",
+        instruction: "Jodohkan kalimat dengan indra penerimanya!",
         items: [
-          { id: "s1", quote: "Angin menusuk pori-pori hingga jemari kaku.", correct: "perabaan" },
-          { id: "s2", quote: "Aroma wangi tanah basah menguar pekat.", correct: "penciuman" },
-          { id: "s3", quote: "Gemertak patahan ranting terdengar nyaring.", correct: "pendengaran" },
-          { id: "s4", quote: "Semburat lembayung jingga memudar di ufuk.", correct: "penglihatan" }
+          { id: "s1", quote: "Permukaan karpet beludru tua itu terasa sangat lembut di telapak kaki.", correct: "perabaan" },
+          { id: "s2", quote: "Aroma harum rempah rebusan jamu Ibu menguar menyelimuti dapur.", correct: "penciuman" },
+          { id: "s3", quote: "Detak jam dinding kayu kuno berdentang dua belas kali.", correct: "pendengaran" },
+          { id: "s4", quote: "Cahaya mentari sore menerobos celah jendela kayu yang menguning.", correct: "penglihatan" }
         ],
-        explanation: "Kaku=Perabaan, Aroma=Penciuman, Gemertak=Pendengaran, Semburat=Penglihatan."
+        explanation: "Lembut=Perabaan, Aroma=Penciuman, Dentang=Pendengaran, Cahaya menerobos=Penglihatan."
       },
       {
-        id: 7, title: "Deteksi Kalimat Sumbang Evakuasi", genre: "Teks Prosedur", type: "detect_odd", points: 10,
-        hint: "Cari 2 langkah yang membahayakan keselamatan gempa.",
-        stimulus: "<p>Deteksi 2 kalimat yang salah dalam prosedur evakuasi gempa!</p>",
-        instruction: "Klik 2 kalimat bertentangan di bawah ini!",
+        id: 7, title: "Deteksi Kalimat Sumbang K3 Prosedur Dapur", genre: "Teks Prosedur", type: "detect_odd", points: 10,
+        hint: "Cari 2 tindakan yang melanggar keselamatan kerja (K3) saat terjadi kebakaran minyak.",
+        glossary: "Kalimat Sumbang: Kalimat yang tidak padu atau merusak keutuhan logika teks.",
+        stimulus: "<p>Deteksi 2 langkah bahaya yang bertentangan dengan prosedur pemadaman api wajan mentega!</p>",
+        instruction: "Klik 2 kalimat instruksi yang SALAH/BERBAHAYA!",
         sentences: [
-          { id: "x1", text: "1. Berlindunglah di bawah meja yang kokoh.", odd: false },
-          { id: "x2", text: "2. Masuklah ke dalam lift darurat dengan tergesa-gesa.", odd: true },
-          { id: "x3", text: "3. Jauhi jendela kaca dan cermin besar.", odd: false },
-          { id: "x4", text: "4. Sempatkan mengemas koper baju besar sebelum keluar.", odd: true },
-          { id: "x5", text: "5. Menuruni tangga darurat menuju titik kumpul.", odd: false }
+          { id: "x1", text: "1. Matikan segera saluran kompor gas.", odd: false },
+          { id: "x2", text: "2. Siramkan satu gayung air dingin tepat ke atas wajan berapi.", odd: true },
+          { id: "x3", text: "3. Tutup wajan menggunakan kain karung basah secara perlahan.", odd: false },
+          { id: "x4", text: "4. Tiup nyala api minyak wajan dengan embusan napas kuat-kuat.", odd: true },
+          { id: "x5", text: "5. Gunakan Alat Pemadam Api Ringan (APAR) jika api membesar.", odd: false }
         ],
-        explanation: "Menggunakan lift dan mengemas koper adalah tindakan berbahaya."
+        explanation: "Menyiram air pada minyak panas meledakkan api; meniup wajan berapi tidak berpengaruh dan membahayakan muka."
       },
       {
-        id: 8, title: "Struktur Reorientasi Rekon", genre: "Teks Rekon", type: "mcma", points: 10,
-        hint: "Reorientasi berisi evaluasi/simpulan kesan penulis.",
-        stimulus: "<p class='bg-indigo-50 p-3 rounded-xl text-xs'>'Keberhasilan KAA 1955 membuktikan bangsa merdeka sanggup memelopori perdamaian. Bagi Indonesia, ini tonggak monumental kehormatan bangsa.'</p>",
-        instruction: "Pilih 3 pernyataan analisis struktur yang tepat!",
+        id: 8, title: "Struktur Reorientasi Rekon Biografi Tokoh", genre: "Teks Rekon", type: "mcma", points: 10,
+        hint: "Reorientasi memuat kesimpulan atau pandangan evaluatif penulis.",
+        glossary: "Reorientasi: Bagian penutup teks rekon yang berisi pandangan/kesan pribadi penulis.",
+        stimulus: "<p class='bg-indigo-50 dark:bg-indigo-950/30 p-3 rounded-xl text-xs'>'Perjuangan B.J. Habibie membuktikan bahwa anak bangsa sanggup memimpin teknologi penerbangan dunia. Pengabdian beliau menjadi obor inspirasi yang tidak pernah padam bagi generasi muda Indonesia.'</p>",
+        instruction: "Pilih 3 pernyataan analisis struktur teks rekon yang tepat!",
         options: [
-          { id: "r1", text: "Kutipan berkedudukan sebagai bagian Reorientasi.", correct: true },
-          { id: "r2", text: "Menggunakan sudut pandang orang ketiga faktual.", correct: true },
-          { id: "r3", text: "Merupakan bagian Orientasi tempat dan waktu.", correct: false },
-          { id: "r4", text: "Mengandung frasa apresiatif 'tonggak monumental'.", correct: true }
+          { id: "r1", text: "Kutipan di atas berkedudukan sebagai bagian Reorientasi.", correct: true },
+          { id: "r2", text: "Menggunakan kalimat bernada apresiatif dan reflektif.", correct: true },
+          { id: "r3", text: "Merupakan bagian Orientasi yang mengenalkan tempat lahir.", correct: false },
+          { id: "r4", text: "Mengandung ungkapan kiasan 'obor inspirasi'.", correct: true }
         ],
-        explanation: "Bagian ini adalah Reorientasi (simpulan/kesan penutup)."
+        explanation: "Kutipan ini adalah Reorientasi yang menyimpulkan refleksi tokoh."
       },
       {
-        id: 9, title: "Majas dalam Teks Deskripsi", genre: "Teks Deskripsi", type: "match_figures", points: 10,
-        hint: "Personifikasi (benda beraksi), Metafora (kiasan langsung), Hiperbola (berlebihan).",
-        stimulus: "<p>Tentukan jenis majas pada masing-masing kalimat deskripsi.</p>",
-        instruction: "Pilihlah majas yang tepat!",
+        id: 9, title: "Majas dalam Deskripsi Hubungan Persaudaraan", genre: "Teks Deskripsi", type: "match_figures", points: 10,
+        hint: "Personifikasi (benda beraksi), Metafora (kiasan padat), Hiperbola (berlebihan).",
+        glossary: "Majas: Gaya bahasa indah yang digunakan untuk meningkatkan efek emosional.",
+        stimulus: "<p>Tentukan jenis gaya bahasa (majas) pada kalimat deskripsi berikut!</p>",
+        instruction: "Pilihlah majas yang tepat untuk setiap kalimat!",
         pairs: [
-          { id: "m1", sentence: "Angin malam berbisik mesra ke telinga pekemah.", correct: "Personifikasi" },
-          { id: "m2", sentence: "Danau Toba adalah permata zamrud raksasa Sumatra.", correct: "Metafora" },
-          { id: "m3", sentence: "Gelegar petir sanggup meruntuhkan seisi langit.", correct: "Hiperbola" }
+          { id: "m1", sentence: "Kamar tidur kakak menatapku bisu saat beliau merantau jauh.", correct: "Personifikasi" },
+          { id: "m2", sentence: "Adik kecilku adalah tulang punggung kebahagiaan keluarga kami.", correct: "Metafora" },
+          { id: "m3", sentence: "Tangisan kerinduan Ibu sanggup menyayat sembilu langit malam.", correct: "Hiperbola" }
         ],
         figureOptions: ["Personifikasi", "Metafora", "Hiperbola"],
-        explanation: "Berbisik=Personifikasi; Permata zamrud=Metafora; Meruntuhkan langit=Hiperbola."
+        explanation: "Menatap bisu=Personifikasi; Tulang punggung=Metafora; Menyayat sembilu langit=Hiperbola."
       },
       {
-        id: 10, title: "Sintesis Teks Hibrida Multi-Genre", genre: "Sintesis Tiga Teks", type: "mcma", points: 10,
-        hint: "Perhatikan perpaduan rekon, deskripsi, dan prosedur.",
-        stimulus: "<p class='bg-slate-50 p-3 rounded-xl text-xs'>[I] Dua tahun lalu kami mendaki Sikunir. [II] Kabut keemasan tersibak disinari mentari. [III] Bagi pendaki pemula, kenakan jaket berlapis ganda.</p>",
-        instruction: "Centang 3 hasil analisis valid mengenai teks hibrida ini!",
+        id: 10, title: "Sintesis Teks Hibrida Multi-Genre Rumah Adat", genre: "Sintesis Tiga Teks", type: "mcma", points: 10,
+        hint: "Analisis penggabungan rekon sejarah, deskripsi bangunan, dan prosedur perawatan.",
+        glossary: "Teks Hibrida: Teks yang menggabungkan dua atau lebih genre tuturan.",
+        stimulus: "<p class='bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl text-xs'>[I] Tahun 1920 kakek mendirikan rumah panggung ini. [II] Tiang kayu ulinnya kokoh berwarna cokelat tua berukir khas Sunda. [III] Lumuri pasak kayu dengan oli bekas tiap 6 bulan agar bebas rayap.</p>",
+        instruction: "Centang 3 hasil analisis struktur valid mengenai teks hibrida ini!",
         options: [
-          { id: "h1", text: "Bagian I berfungsi sebagai Rekon (pengalaman lampau).", correct: true },
-          { id: "h2", text: "Bagian II berfungsi sebagai Deskripsi (gambaran visual).", correct: true },
-          { id: "h3", text: "Bagian III berfungsi sebagai Prosedur (panduan teknis).", correct: true },
-          { id: "h4", text: "Seluruh kutipan adalah bentuk teks resensi sastra.", correct: false }
+          { id: "h1", text: "Kalimat [I] berfungsi sebagai Rekon (sejarah pendirian).", correct: true },
+          { id: "h2", text: "Kalimat [II] berfungsi sebagai Deskripsi (fisik bangunan).", correct: true },
+          { id: "h3", text: "Kalimat [III] berfungsi sebagai Prosedur (panduan perawatan).", correct: true },
+          { id: "h4", text: "Seluruh kalimat di atas merupakan potongan naskah drama komedi.", correct: false }
         ],
-        explanation: "Teks memadukan rekon (pengalaman), deskripsi (visual), dan prosedur (keamanan)."
+        explanation: "Teks memadukan rekon (sejarah), deskripsi (visual), dan prosedur (perawatan)."
       },
       {
-        id: 11, title: "Evaluasi Bias & Asumsi Rekon Sejarah", genre: "Teks Rekon Kritis", type: "essay_rubric", points: 10,
+        id: 11, title: "Evaluasi Bias & Subjektivitas Rekon Keluarga", genre: "Teks Rekon Kritis", type: "essay_rubric", points: 10,
         hint: "Gunakan kata kunci: 'subjektif', 'bukti', 'perspektif', dan 'arsip'.",
-        stimulus: "<p class='bg-rose-50 p-3 rounded-xl text-xs font-serif'>'Pembangunan jalan raya Daendels sepenuhnya merupakan aksi kejam tanpa nilai kemanusiaan, sebab seluruh pekerja lokal meninggal tanpa kompensasi sedikit pun.'</p>",
-        instruction: "Tuliskan analisis 2-3 kalimat: Mengapa pernyataan di atas tergolong rekon yang bias/subjektif jika ditinjau dari historiografi objektif?",
+        glossary: "Bias Rekon: Ketidakseimbangan sudut pandang akibat emosi atau prasangka pribadi.",
+        stimulus: "<p class='bg-rose-50 dark:bg-rose-950/30 p-3 rounded-xl text-xs font-serif'>'Kakek saya adalah satu-satunya pahlawan paling berjasa di desa ini tanpa cela sedikit pun, sedangkan warga lainnya sama sekali tidak berkontribusi dalam pembangunan sekolah desa.'</p>",
+        instruction: "Tuliskan analisis 2-3 kalimat: Mengapa klaim rekon di atas tergolong bias dan tidak valid secara historiografi?",
         requiredKeywords: ["subjektif", "bukti", "perspektif", "arsip"],
-        explanation: "Rekon sejarah objektif harus menimbang berbagai arsip dokumen resmi dan tidak menggunakan generalisasi emosional mutlak."
+        explanation: "Rekon objektif membutuhkan verifikasi arsip dan tidak boleh mengabaikan peran pihak lain secara emosional."
       },
       {
-        id: 12, title: "Koreksi Inkoherensi Prosedur Industri", genre: "Teks Prosedur Kritis", type: "mcma", points: 10,
-        hint: "Cermati kegagalan logis antara sterilisasi dan kontaminasi udara.",
-        stimulus: "<p class='bg-slate-50 p-3 rounded-xl text-xs'>'Langkah 3: Sterilkan tabung reaksi dengan panas tinggi 120°C. Langkah 4: Tiup bagian dalam tabung dengan mulut untuk mendinginkannya secara cepat sebelum dimasukkan sampel isolat bactericidal.'</p>",
-        instruction: "Analisislah cacat prosedur pada Langkah 4 di atas! (Pilih 2 jawaban tepat)",
+        id: 12, title: "Koreksi Inkoherensi Prosedur Penggunaan Mesin Cuci", genre: "Teks Prosedur Kritis", type: "mcma", points: 10,
+        hint: "Cermati kontradiksi teknis antara fungsi pengeringan dan penambahan air.",
+        glossary: "Inkoherensi: Ketidaklogisan hubungan antarlangkah atau antarpernyataan.",
+        stimulus: "<p class='bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl text-xs'>'Langkah 4: Masukkan pakaian ke dalam tabung pengering (spin) selama 5 menit. Langkah 5: Tuangkan 1 ember air sabun pekat ke dalam tabung pengering saat tabung berputar kencang agar pakaian makin harum.'</p>",
+        instruction: "Analisislah cacat prosedur pada Langkah 5 di atas! (Pilih 2 jawaban tepat)",
         options: [
-          { id: "p1", text: "Mentiup dengan mulut memasukkan bakteri/uap air manusia (merusak sterilisasi).", correct: true },
-          { id: "p2", text: "Langkah tersebut membuat tabung menjadi terlambat dingin.", correct: false },
-          { id: "p3", text: "Kontradiksi langsung dengan tujuan sterilisasi pada Langkah 3.", correct: true },
-          { id: "p4", text: "Langkah 3 seharusnya menggunakan es batu.", correct: false }
+          { id: "p1", text: "Menambahkan air sabun saat pemerasan membatalkan fungsi pengeringan.", correct: true },
+          { id: "p2", text: "Menyiram air pada tabung spin berkecepatan tinggi berisiko merusak dinamo mesin.", correct: true },
+          { id: "p3", text: "Langkah 5 sudah sangat tepat sesuai instruksi pabrik.", correct: false },
+          { id: "p4", text: "Pakaian seharusnya dijemur di bawah tanah.", correct: false }
         ],
-        explanation: "Mentiup tabung yang baru disterilkan membatalkan status sterilisasi akibat mikroba udara pernapasan."
+        explanation: "Menyiram air pada tabung pengering membatalkan proses pengeringan dan dapat merusak korsleting motor listrik."
       },
       {
-        id: 13, title: "Dekonstruksi Penggunaan Diksi Deskripsi Propaganda", genre: "Teks Deskripsi Kritis", type: "essay_rubric", points: 10,
+        id: 13, title: "Dekonstruksi Diksi Deskripsi Propaganda Penjualan Rumah", genre: "Teks Deskripsi Kritis", type: "essay_rubric", points: 10,
         hint: "Gunakan kata kunci: 'emotif', 'provokatif', 'opini', dan 'persuasi'.",
-        stimulus: "<p class='bg-amber-50 p-3 rounded-xl text-xs font-serif'>'Kota X adalah neraka kumuh yang dipenuhi manusia malas dan jalanan busuk yang menghancurkan masa depan siapa pun yang menginjakkan kaki di sana.'</p>",
-        instruction: "Tuliskan analisis singkat: Mengapa teks deskripsi di atas melanggar asas kesantunan deskripsi objektif?",
+        glossary: "Deskripsi Propaganda: Deskripsi yang menggunakan kata-kata persuasif berlebihan untuk memanipulasi pembaca.",
+        stimulus: "<p class='bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl text-xs font-serif'>'Perumahan X adalah surga dunia tanpa tanding, istana megah paling sempurna yang dijamin membebaskan hidup Anda dari segala bentuk penderitaan dan beban emosional.'</p>",
+        instruction: "Tuliskan analisis singkat: Mengapa diksi deskripsi properti di atas melanggar asas deskripsi objektif?",
         requiredKeywords: ["emotif", "provokatif", "opini", "persuasi"],
-        explanation: "Deskripsi di atas sarat diksi emotif-provokatif yang menghakimi secara pejoratif alih-alih melukiskan fakta fisik secara netral."
+        explanation: "Teks menggunakan diksi emotif-persuasif berlebihan yang tidak mencerminkan data fisik bangunan."
       },
       {
-        id: 14, title: "Evaluasi Kontradiksi Logis Prosedur Medis", genre: "Teks Prosedur", type: "mcma", points: 10,
-        hint: "Cari bahaya interaksi obat/tindakan medis bertentangan.",
-        stimulus: "<p class='bg-red-50 p-3 rounded-xl text-xs'>'(1) Kompres luka bakar dengan air es selama 30 menit. (2) Berikan minyak goreng mentah untuk menutup pori-pori. (3) Balut rapat dengan kain tipis bersih.'</p>",
-        instruction: "Mengapa prosedur penanganan luka bakar di atas sangat berbahaya secara medis? (Centang 2 opsi tepat)",
+        id: 14, title: "Evaluasi Kontradiksi Logis Prosedur Pertolongan Pertama", genre: "Teks Prosedur", type: "mcma", points: 10,
+        hint: "Cari bahaya penanganan korban tersedak yang bertentangan dengan medis.",
+        glossary: "Heimlich Maneuver: Prosedur medis darurat untuk membebaskan jalan napas yang tersumbat.",
+        stimulus: "<p class='bg-red-50 dark:bg-red-950/30 p-3 rounded-xl text-xs'>'(1) Dorong makanan masuk lebih dalam dengan jari tangan. (2) Beri minum air panas mendidih. (3) Lakukan dorongan perut (Heimlich maneuver) jika korban sadar.'</p>",
+        instruction: "Mengapa langkah (1) dan (2) sangat berbahaya secara medis? (Centang 2 opsi tepat)",
         options: [
-          { id: "m1", text: "Mengoleskan minyak mentah mengurung panas di dalam kulit dan memicu infeksi.", correct: true },
-          { id: "m2", text: "Air es berisiko menyebabkan radang dingin (frostbite) pada jaringan rusak.", correct: true },
-          { id: "m3", text: "Kain bersih tidak boleh menyentuh tubuh manusia.", correct: false },
-          { id: "m4", text: "Luka bakar seharusnya disiram air panas mendidih.", correct: false }
+          { id: "m1", text: "Mendorong dengan jari berisiko menyumbat saluran napas semakin rapat.", correct: true },
+          { id: "m2", text: "Memberi air panas mendidih dapat membakar tenggorokan dan memicu aspirasi paru.", correct: true },
+          { id: "m3", text: "Heimlich maneuver adalah tindakan terlarang di dunia.", correct: false },
+          { id: "m4", text: "Air dingin membuat makanan menjadi batu.", correct: false }
         ],
-        explanation: "Minyak mengurung panas dan air es merusak sel jaringan tubuh."
+        explanation: "Mendorong jari memperparah sumbatan dan air panas merusak jaringan mukosa tenggorokan."
       },
       {
-        id: 15, title: "Sintesis Kritis: Validitas Sumber Rekon Digital", genre: "Teks Rekon Digital", type: "essay_rubric", points: 10,
+        id: 15, title: "Sintesis Kritis: Validitas Sumber Rekon Digital Keluarga", genre: "Teks Rekon Digital", type: "essay_rubric", points: 10,
         hint: "Gunakan kata kunci: 'verifikasi', 'sumber', 'fakta', dan 'pembanding'.",
-        stimulus: "<p class='bg-blue-50 p-3 rounded-xl text-xs'>Sebuah blog pribadi anonim menyajikan laporan rekon bahwa candi populer dibangun dalam 1 malam oleh makhluk halus tanpa menyebut riset arkeologi.</p>",
-        instruction: "Bagaimana Anda sebagai siswa kritis menyikapi validitas kebenaran teks rekon tersebut?",
+        glossary: "Rekon Digital: Catatan rekon yang diunggah pada platform digital/media sosial.",
+        stimulus: "<p class='bg-blue-50 dark:bg-blue-950/30 p-3 rounded-xl text-xs'>Sebuah hantaran video viral mengeklaim bahwa silsilah keluarga raja-raja kuno berasal dari desa X tanpa menyertakan prasasti atau dokumen silsilah terverifikasi.</p>",
+        instruction: "Bagaimana sikap kritis Anda sebagai siswa IX dalam menyikapi klaim rekon digital tersebut?",
         requiredKeywords: ["verifikasi", "sumber", "fakta", "pembanding"],
-        explanation: "Siswa harus melakukan verifikasi silang (cross-check) menggunakan sumber pustaka arkeologi resmi."
+        explanation: "Siswa harus melakukan verifikasi silang (cross-check) pada dokumen sejarah primer dan tidak langsung mempercayai klaim viral."
       },
       {
         id: 16, title: "Analisis Kesalahan Logika (Logical Fallacy) Rekon", genre: "Teks Rekon Analitis", type: "mcma", points: 10,
-        hint: "Cermati hubungan sebab-akibat palsu.",
-        stimulus: "<p class='bg-slate-50 p-3 rounded-xl text-xs font-serif'>'Kemarin pagi seekor burung gagak hinggap di atap balai desa. Dua jam kemudian jembatan desa runtuh. Terbukti bahwa burung gagak memicu kehancuran jembatan.'</p>",
+        hint: "Cermati asumsi hubungan sebab-akibat palsu (Post Hoc Ergo Propter Hoc).",
+        glossary: "Logical Fallacy: Kesalahan dalam penyusunan penalaran logis yang sah.",
+        stimulus: "<p class='bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl text-xs font-serif'>'Kemarin malam kucing hitam menyeberang di depan rumah kami. Dua jam kemudian pipa air dapur mendadak bocor. Terbukti bahwa kucing hitam membawa sial pada instalasi air.'</p>",
         instruction: "Kekeliruan penalaran apa yang terdapat pada teks rekon pribadi di atas? (Pilih 2 opsi tepat)",
         options: [
-          { id: "f1", text: "Menganggap dua peristiwa berurutan pasti memiliki hubungan sebab-akibat.", correct: true },
-          { id: "f2", text: "Mengabaikan analisis struktur material fisik dan beban jembatan.", correct: true },
-          { id: "f3", text: "Teks di atas menggunakan bukti laboratorium sains.", correct: false },
-          { id: "f4", text: "Burung gagak memang memiliki kekuatan menghancurkan beton.", correct: false }
+          { id: "f1", text: "Menganggap urutan peristiwa kebetulan sebagai hubungan sebab-akibat mutlak.", correct: true },
+          { id: "f2", text: "Mengabaikan analisis keausan teknis pada sambungan pipa air.", correct: true },
+          { id: "f3", text: "Penulis menggunakan pengujian tekanan hidrostatik pipa.", correct: false },
+          { id: "f4", text: "Kucing hitam memang memancarkan gelombang perusak besi.", correct: false }
         ],
-        explanation: "Menghubungkan kebetulan urutan waktu antara burung gagak dan jembatan runtuh adalah kesalahan logika sebab-akibat."
+        explanation: "Menghubungkan kebetulan kehadiran kucing dengan pipa bocor adalah kesalahan logika sebab-akibat."
       },
       {
-        id: 17, title: "Evaluasi Efektivitas Diksi Deskripsi Suasana", genre: "Teks Deskripsi Suasana", type: "essay_rubric", points: 10,
+        id: 17, title: "Evaluasi Efektivitas Diksi Deskripsi Kampung Halaman", genre: "Teks Deskripsi Suasana", type: "essay_rubric", points: 10,
         hint: "Gunakan kata kunci: 'spesifik', 'imajinasi', 'diksi', dan 'suasana'.",
-        stimulus: "<p class='bg-amber-50 p-3 rounded-xl text-xs'>'Suasana pasar malam sangat ramai dan banyak orang jualan makanan enak serta mainan bagus yang disukai anak-anak kecil.'</p>",
-        instruction: "Urailah kritik Anda terhadap kelemahan deskripsi suasana di atas agar menjadi lebih hidup!",
+        glossary: "Diksi Spesifik: Pemilihan kata konkrit yang presisi untuk membangkitkan panca indra.",
+        stimulus: "<p class='bg-amber-50 dark:bg-amber-950/30 p-3 rounded-xl text-xs'>'Desa kakek sangat indah dan bagus. Di sana udaranya segar sekali dan pemandangannya amat sangat memanjakan mata siapa saja.'</p>",
+        instruction: "Tuliskan kritik Anda terhadap diksi deskripsi di atas agar lebih konkret dan hidup!",
         requiredKeywords: ["spesifik", "imajinasi", "diksi", "suasana"],
-        explanation: "Teks menggunakan kata sifat umum ('ramai', 'enak', 'bagus') yang gagal membangkitkan imajinasi konkret."
+        explanation: "Kata sifat umum 'indah/bagus/segar' gagal memunculkan imajinasi konkret tanpa rincian objek penglihatan/penciuman."
       },
       {
-        id: 18, title: "Analisis Ambiguitas Kalimat Prosedur Hukum", genre: "Teks Prosedur", type: "mcma", points: 10,
-        hint: "Temukan klausa ganda yang membingungkan pelaksana.",
-        stimulus: "<p class='bg-slate-50 p-3 rounded-xl text-xs font-mono'>'Peserta wajib menyerahkan fotokopi ijazah yang dilegalisir dan pasfoto terbaru atau surat keterangan lulus yang asli sebelum hari Selasa.'</p>",
-        instruction: "Mengapa kalimat instruksi di atas bersifat ambigu / bermakna ganda? (Centang 2 alasan tepat)",
+        id: 18, title: "Analisis Ambiguitas Kalimat Prosedur Warisan Keluarga", genre: "Teks Prosedur", type: "mcma", points: 10,
+        hint: "Temukan klausa ganda yang menimbulkan ketidakpastian hukum/eksekusi.",
+        glossary: "Ambiguitas: Konstruksi bahasa yang mengandung lebih dari satu penafsiran.",
+        stimulus: "<p class='bg-slate-50 dark:bg-slate-900/40 p-3 rounded-xl text-xs font-mono'>'Ahli waris wajib menyerahkan fotokopi sertifikat tanah yang dilegalisir dan surat kematian asli atau dokumen pendukung dari lurah sebelum akhir bulan.'</p>",
+        instruction: "Mengapa kalimat instruksi di atas bersifat ambigu? (Centang 2 alasan tepat)",
         options: [
-          { id: "a1", text: "Penggunaan 'atau' membingungkan apakah pasfoto sifatnya wajib atau opsional pengganti.", correct: true },
-          { id: "a2", text: "Tidak ada batasan jelas apakah legalisir berlaku untuk surat keterangan lulus.", correct: true },
-          { id: "a3", text: "Kalimat di atas sangat tegas tanpa cela bahasa.", correct: false },
-          { id: "a4", text: "Kata 'Selasa' bukan nama hari yang sah.", correct: false }
+          { id: "a1", text: "Kata 'atau' membingungkan apakah surat kematian wajib diserahkan atau opsional.", correct: true },
+          { id: "a2", text: "Tidak jelas apakah frasa 'dari lurah' menerangkan dokumen pendukung saja atau seluruh dokumen.", correct: true },
+          { id: "a3", text: "Kalimat di atas sangat lugas tanpa celah tafsir.", correct: false },
+          { id: "a4", text: "Kata 'lurah' bukan profesi di Indonesia.", correct: false }
         ],
-        explanation: "Struktur kalimat campuran tanpa tanda baca koma memicu multitafsir syarat dokumen."
+        explanation: "Struktur tanpa tanda baca memicu multitafsir syarat kelengkapan dokumen."
       },
       {
-        id: 19, title: "Kritisasi Rekon Otobiografi Subjektif", genre: "Teks Rekon", type: "essay_rubric", points: 10,
+        id: 19, title: "Kritisasi Rekon Catatan Harian Subjektif", genre: "Teks Rekon", type: "essay_rubric", points: 10,
         hint: "Gunakan kata kunci: 'objektif', 'penilaian', 'data', dan 'pembanding'.",
-        stimulus: "<p class='bg-purple-50 p-3 rounded-xl text-xs font-serif'>'Selama 5 tahun memimpin klub, saya tidak pernah membuat satu pun kesalahan taktis. Semua kegagalan pertandingan disebabkan kecurangan wasit dan kemalasan pemain lain.'</p>",
-        instruction: "Analisislah mengapa teks rekon otobiografi di atas memiliki kredibilitas yang sangat rendah!",
+        glossary: "Rekon Subjektif: Catatan peristiwa masa lalu yang didominasi oleh prasangka emosi penulis.",
+        stimulus: "<p class='bg-purple-50 dark:bg-purple-950/30 p-3 rounded-xl text-xs font-serif'>'Selama 3 tahun menjabat ketua kelas, saya selalu sempurna. Semua perselisihan di kelas 100% disebabkan oleh kejahatan anggota kelas lain yang iri pada saya.'</p>",
+        instruction: "Analisislah mengapa teks rekon pribadi di atas memiliki kredibilitas informasi yang rendah!",
         requiredKeywords: ["objektif", "penilaian", "data", "pembanding"],
-        explanation: "Penulis bersikap narsistik/subjektif dengan menolak kesalahan tanpa menyajikan data statistik objektif."
+        explanation: "Penulis menolak introspeksi dan menyalahkan pihak lain tanpa menyajikan data faktual yang netral."
       },
       {
-        id: 20, title: "Sintesis Komprehensif Evaluasi Genre Teks", genre: "Analisis Sintesis HOTS", type: "essay_rubric", points: 10,
+        id: 20, title: "Sintesis Komprehensif Evaluasi Tiga Genre Teks", genre: "Analisis Sintesis HOTS", type: "essay_rubric", points: 10,
         hint: "Gunakan kata kunci: 'struktur', 'kaidah', 'tujuan', dan 'efektivitas'.",
-        stimulus: "<p class='bg-emerald-50 p-3 rounded-xl text-xs'>Seorang penulis membuat artikel gabungan yang diawali kisah sejarah bencana (Rekon), lukisan fisik kawah (Deskripsi), dan panduan evakuasi darurat (Prosedur).</p>",
-        instruction: "Tuliskan kesimpulan analitis Anda: Mengapa penggabungan 3 genre teks ini sangat efektif dalam edukasi bencana?",
+        glossary: "Sintesis Kebahasaan: Mengintegrasikan berbagai struktur genre teks untuk tujuan komunikasi kompleks.",
+        stimulus: "<p class='bg-emerald-50 dark:bg-emerald-950/30 p-3 rounded-xl text-xs'>Seorang penulis menyusun artikel keluarga dengan memadukan sejarah migrasi nenek moyang (Rekon), deskripsi rumah pusaka (Deskripsi), dan panduan merawat arsip tua (Prosedur).</p>",
+        instruction: "Tuliskan kesimpulan analitis Anda: Mengapa penggabungan 3 genre teks ini sangat efektif dalam penyampaian ide!",
         requiredKeywords: ["struktur", "kaidah", "tujuan", "efektivitas"],
-        explanation: "Penggabungan 3 genre teks memberikan pemahaman utuh: konteks histori, gambaran medan nyata, dan panduan tindakan."
+        explanation: "Perpaduan 3 genre memberikan pemahaman utuh: konteks sejarah, gambaran fisik konkret, dan tindakan praktis."
       }
     ];
 
@@ -563,7 +727,10 @@
       levelAttempts: new Array(QUIZ_LEVELS.length).fill(0),
       totalTimerSeconds: 35 * 60,
       timerInterval: null,
-      timeElapsedSeconds: 0
+      timeElapsedSeconds: 0,
+      textScale: 1, // Accessibility font scaler index
+      darkMode: false,
+      leaderboard: []
     };
 
     // DOM ELEMENTS
@@ -593,31 +760,86 @@
 
     const modalHint = document.getElementById('modalHint');
     const modalHintText = document.getElementById('modalHintText');
+    const glossaryPanel = document.getElementById('glossaryPanel');
+    const glossaryText = document.getElementById('glossaryText');
+
+    const modalTeacherPasscode = document.getElementById('modalTeacherPasscode');
+    const modalTeacherDashboard = document.getElementById('modalTeacherDashboard');
 
     window.addEventListener('DOMContentLoaded', () => {
+      checkAutoSaveSession();
       renderLevelBubbles();
       setupEventListeners();
       setupAntiCheat();
     });
 
+    /* ========================================================
+     * MODUL 3: AUTO-SAVE & RESUME SESSION
+     * ======================================================== */
+    function checkAutoSaveSession() {
+      const saved = localStorage.getItem('lentera_bindo_ix_save');
+      if (saved) {
+        try {
+          const data = JSON.parse(saved);
+          if (data && data.student && data.student.name) {
+            document.getElementById('resumeNotice').classList.remove('hidden');
+          }
+        } catch(e) {}
+      }
+    }
+
+    function saveStateToLocal() {
+      const payload = {
+        student: State.student,
+        currentLevelIdx: State.currentLevelIdx,
+        unlockedLevel: State.unlockedLevel,
+        scores: State.scores,
+        levelStatus: State.levelStatus,
+        levelAttempts: State.levelAttempts,
+        totalTimerSeconds: State.totalTimerSeconds,
+        timeElapsedSeconds: State.timeElapsedSeconds
+      };
+      localStorage.setItem('lentera_bindo_ix_save', JSON.stringify(payload));
+    }
+
+    function restoreSession() {
+      const saved = localStorage.getItem('lentera_bindo_ix_save');
+      if (saved) {
+        const data = JSON.parse(saved);
+        State.student = data.student;
+        State.currentLevelIdx = data.currentLevelIdx || 0;
+        State.unlockedLevel = data.unlockedLevel || 1;
+        State.scores = data.scores || State.scores;
+        State.levelStatus = data.levelStatus || State.levelStatus;
+        State.levelAttempts = data.levelAttempts || State.levelAttempts;
+        State.totalTimerSeconds = data.totalTimerSeconds || (35*60);
+        State.timeElapsedSeconds = data.timeElapsedSeconds || 0;
+        startQuiz(true);
+      }
+    }
+
     function setupAntiCheat() {
       document.addEventListener('contextmenu', e => e.preventDefault());
       document.addEventListener('visibilitychange', () => {
         if (document.hidden && !screenGame.classList.contains('hidden')) {
-          alert("Peringatan Sistem: Anda terdeteksi meninggalkan tab halaman asesmen!");
+          alert("Peringatan Sistem Keamanan: Anda terdeteksi berpindah tab halaman!");
         }
       });
     }
 
     function setupEventListeners() {
+      // Form Start
       document.getElementById('formStartQuiz').addEventListener('submit', (e) => {
         e.preventDefault();
         State.student.name = document.getElementById('studentName').value.trim();
         State.student.class = document.getElementById('studentClass').value;
         State.student.absen = document.getElementById('studentAbsen').value.trim();
-        if (State.student.name && State.student.class && State.student.absen) startQuiz();
+        if (State.student.name && State.student.class && State.student.absen) startQuiz(false);
       });
 
+      document.getElementById('btnResumeSession').addEventListener('click', restoreSession);
+
+      // Answer Checks
       btnCheckAnswer.addEventListener('click', () => evaluateLevel());
       
       btnNextLevel.addEventListener('click', () => {
@@ -632,33 +854,102 @@
           State.unlockedLevel = State.currentLevelIdx + 2;
           State.levelStatus[State.currentLevelIdx + 1] = 'unlocked';
         }
+        saveStateToLocal();
         if (State.currentLevelIdx < QUIZ_LEVELS.length - 1) loadLevel(State.currentLevelIdx + 1);
         else finishQuiz();
       });
 
+      // Hint & Glossary Modal
       btnHint.addEventListener('click', () => {
-        modalHintText.textContent = QUIZ_LEVELS[State.currentLevelIdx].hint || "Cermati kata kunci teks.";
+        const lvl = QUIZ_LEVELS[State.currentLevelIdx];
+        modalHintText.textContent = lvl.hint || "Cermati kata kunci teks.";
+        if (lvl.glossary) {
+          glossaryText.textContent = lvl.glossary;
+          glossaryPanel.classList.remove('hidden');
+        } else {
+          glossaryPanel.classList.add('hidden');
+        }
         modalHint.classList.remove('hidden');
       });
       document.getElementById('btnCloseHint').addEventListener('click', () => modalHint.classList.add('hidden'));
       document.getElementById('btnDismissHint').addEventListener('click', () => modalHint.classList.add('hidden'));
+
+      // Modul 6: Text To Speech (Audio Reader)
+      document.getElementById('btnReadText').addEventListener('click', () => {
+        const textToRead = stimulusContainer.textContent;
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(textToRead);
+          utterance.lang = 'id-ID';
+          utterance.rate = 0.9;
+          window.speechSynthesis.speak(utterance);
+        } else {
+          alert("Fitur pembaca suara tidak didukung browser ini.");
+        }
+      });
+
+      // Modul 7: Dark Mode Toggle
+      document.getElementById('btnToggleTheme').addEventListener('click', () => {
+        State.darkMode = !State.darkMode;
+        if (State.darkMode) document.documentElement.classList.add('dark');
+        else document.documentElement.classList.remove('dark');
+      });
+
+      // Modul 6: Font Scaler (Accessibility)
+      document.getElementById('btnTextScale').addEventListener('click', () => {
+        const scales = ['', 'text-scale-sm', 'text-scale-base', 'text-scale-lg', 'text-scale-xl'];
+        State.textScale = (State.textScale + 1) % scales.length;
+        document.body.className = document.body.className.replace(/text-scale-\w+/g, '');
+        if (scales[State.textScale]) document.body.classList.add(scales[State.textScale]);
+      });
+
+      // Modul 2 & 4: Teacher Passcode & Dashboard Access
+      document.getElementById('btnOpenTeacherPasscode').addEventListener('click', () => {
+        modalTeacherPasscode.classList.remove('hidden');
+      });
+      document.getElementById('btnCancelPasscode').addEventListener('click', () => {
+        modalTeacherPasscode.classList.add('hidden');
+      });
+      document.getElementById('btnSubmitPasscode').addEventListener('click', () => {
+        const pass = document.getElementById('teacherPasscodeInput').value;
+        if (pass === 'smp28bisa') {
+          modalTeacherPasscode.classList.add('hidden');
+          document.getElementById('teacherPasscodeInput').value = '';
+          openTeacherDashboard();
+        } else {
+          alert("Passcode salah! Akses ditolak.");
+        }
+      });
+      document.getElementById('btnCloseTeacherDash').addEventListener('click', () => {
+        modalTeacherDashboard.classList.add('hidden');
+      });
+
+      // Modul 1: Export/Import JSON Soal
+      document.getElementById('btnExportJSON').addEventListener('click', exportQuestionsJSON);
+      document.getElementById('inputImportJSON').addEventListener('change', importQuestionsJSON);
+      document.getElementById('btnExportClassExcel').addEventListener('click', exportClassExcel);
+
+      // Modul 8 & 10: PDF & Image PNG Capture
       document.getElementById('btnPrintReport').addEventListener('click', () => window.print());
+      document.getElementById('btnDownloadPNG').addEventListener('click', downloadReportPNG);
     }
 
-    function startQuiz() {
+    function startQuiz(isResumed = false) {
       screenWelcome.classList.add('hidden');
       screenGame.classList.remove('hidden');
       screenGame.classList.add('flex');
       topQuizMeta.classList.remove('hidden');
-      State.levelStatus[0] = 'unlocked';
+      if (!isResumed) State.levelStatus[0] = 'unlocked';
       startMasterTimer();
-      loadLevel(0);
+      loadLevel(State.currentLevelIdx);
     }
 
     function startMasterTimer() {
+      if (State.timerInterval) clearInterval(State.timerInterval);
       State.timerInterval = setInterval(() => {
         State.totalTimerSeconds--;
         State.timeElapsedSeconds++;
+        saveStateToLocal();
         if (State.totalTimerSeconds <= 0) {
           clearInterval(State.timerInterval);
           finishQuiz();
@@ -675,7 +966,7 @@
       QUIZ_LEVELS.forEach((lvl, idx) => {
         const bubble = document.createElement('button');
         bubble.type = "button";
-        let statusClass = "bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed";
+        let statusClass = "bg-slate-100 dark:bg-slate-700 text-slate-400 border-slate-200 dark:border-slate-600 cursor-not-allowed";
         let iconHtml = `${idx + 1}`;
 
         if (State.levelStatus[idx] === 'cleared') {
@@ -687,7 +978,7 @@
         } else if (idx === State.currentLevelIdx) {
           statusClass = "bg-indigo-600 text-white ring-2 ring-indigo-300 font-bold scale-105";
         } else if (idx < State.unlockedLevel) {
-          statusClass = "bg-indigo-50 text-indigo-700 border-indigo-200";
+          statusClass = "bg-indigo-50 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800";
         }
 
         bubble.className = `h-7 text-[10px] rounded-lg border flex items-center justify-center transition-all ${statusClass}`;
@@ -702,7 +993,7 @@
       const remaining = Math.max(0, 3 - attempts);
       let html = "";
       for (let i = 0; i < 3; i++) {
-        html += i < remaining ? `<i class="fa-solid fa-heart text-rose-500"></i>` : `<i class="fa-regular fa-heart text-slate-300"></i>`;
+        html += i < remaining ? `<i class="fa-solid fa-heart text-rose-500"></i>` : `<i class="fa-regular fa-heart text-slate-300 dark:text-slate-600"></i>`;
       }
       heartsContainer.innerHTML = html;
       maxScoreDisplay.textContent = `${getCalculatedScore(attempts)} Poin`;
@@ -748,6 +1039,7 @@
 
       renderLevelBubbles();
       updateScoreBadge();
+      saveStateToLocal();
     }
 
     function updateScoreBadge() {
@@ -762,10 +1054,10 @@
       const randomizedOptions = shuffleArray(data.options);
       randomizedOptions.forEach((opt) => {
         const item = document.createElement('label');
-        item.className = "flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 cursor-pointer text-xs sm:text-sm";
+        item.className = "flex items-start gap-3 p-3.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 cursor-pointer text-xs sm:text-sm";
         item.innerHTML = `
           <input type="checkbox" name="mcma_opt" value="${opt.id}" class="mt-1 w-4 h-4 text-indigo-600 rounded">
-          <span class="text-slate-700">${opt.text}</span>
+          <span class="text-slate-700 dark:text-slate-200">${opt.text}</span>
         `;
         container.appendChild(item);
       });
@@ -780,12 +1072,12 @@
 
       shuffled.forEach((step, idx) => {
         const item = document.createElement('div');
-        item.className = "drag-item flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm";
+        item.className = "drag-item flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs sm:text-sm";
         item.dataset.id = step.id;
         item.innerHTML = `
           <div class="flex items-center gap-3">
-            <span class="w-6 h-6 rounded bg-indigo-50 text-indigo-600 font-bold flex items-center justify-center text-xs step-index">${idx + 1}</span>
-            <span class="text-slate-700">${step.text}</span>
+            <span class="w-6 h-6 rounded bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 font-bold flex items-center justify-center text-xs step-index">${idx + 1}</span>
+            <span class="text-slate-700 dark:text-slate-200">${step.text}</span>
           </div>
           <div class="flex items-center gap-1 text-slate-400">
             <button type="button" class="btn-up p-1 hover:text-indigo-600"><i class="fa-solid fa-arrow-up"></i></button>
@@ -820,12 +1112,12 @@
       container.className = "space-y-3";
       data.items.forEach((item) => {
         const row = document.createElement('div');
-        row.className = "p-3 rounded-xl border border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between gap-3 text-xs";
+        row.className = "p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 flex flex-col sm:flex-row justify-between gap-3 text-xs";
         row.innerHTML = `
-          <p class="text-slate-700 font-medium flex-1">${item.text}</p>
+          <p class="text-slate-700 dark:text-slate-200 font-medium flex-1">${item.text}</p>
           <div class="flex items-center gap-2">
-            <label class="px-2 py-1 rounded border bg-white cursor-pointer"><input type="radio" name="c_${item.id}" value="fakta"> Fakta</label>
-            <label class="px-2 py-1 rounded border bg-white cursor-pointer"><input type="radio" name="c_${item.id}" value="opini"> Opini</label>
+            <label class="px-2 py-1 rounded border bg-white dark:bg-slate-700 cursor-pointer"><input type="radio" name="c_${item.id}" value="fakta"> Fakta</label>
+            <label class="px-2 py-1 rounded border bg-white dark:bg-slate-700 cursor-pointer"><input type="radio" name="c_${item.id}" value="opini"> Opini</label>
           </div>
         `;
         container.appendChild(row);
@@ -838,10 +1130,10 @@
       container.className = "grid grid-cols-1 sm:grid-cols-3 gap-3";
       data.dropdowns.forEach((dp) => {
         const box = document.createElement('div');
-        box.className = "p-3 rounded-xl border border-slate-200 bg-slate-50";
+        box.className = "p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40";
         box.innerHTML = `
-          <label class="block text-xs font-bold text-slate-700 mb-2">${dp.label}</label>
-          <select id="${dp.id}" class="w-full p-2 rounded-lg border bg-white text-xs font-semibold">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-2">${dp.label}</label>
+          <select id="${dp.id}" class="w-full p-2 rounded-lg border bg-white dark:bg-slate-700 text-xs font-semibold">
             <option value="">-- Pilih --</option>
             ${dp.options.map(o => `<option value="${o.val}">${o.text}</option>`).join('')}
           </select>
@@ -856,10 +1148,10 @@
       container.className = "space-y-3";
       data.items.forEach((item) => {
         const row = document.createElement('div');
-        row.className = "p-3 rounded-xl border bg-slate-50 flex flex-col sm:flex-row justify-between gap-3 text-xs";
+        row.className = "p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 flex flex-col sm:flex-row justify-between gap-3 text-xs";
         row.innerHTML = `
-          <p class="text-slate-700 italic flex-1">"${item.quote}"</p>
-          <select id="s_${item.id}" class="p-2 rounded border bg-white text-xs">
+          <p class="text-slate-700 dark:text-slate-200 italic flex-1">"${item.quote}"</p>
+          <select id="s_${item.id}" class="p-2 rounded border bg-white dark:bg-slate-700 text-xs">
             <option value="">-- Pilih Indra --</option>
             <option value="penglihatan">Penglihatan</option>
             <option value="pendengaran">Pendengaran</option>
@@ -879,7 +1171,7 @@
         const btn = document.createElement('button');
         btn.type = "button";
         btn.dataset.id = s.id;
-        btn.className = "odd-btn w-full text-left p-3 rounded-xl border border-slate-200 bg-white text-xs flex items-center gap-3";
+        btn.className = "odd-btn w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs flex items-center gap-3";
         btn.innerHTML = `<span class="w-4 h-4 border rounded check-box"></span> <span>${s.text}</span>`;
         btn.addEventListener('click', () => {
           btn.classList.toggle('selected-odd');
@@ -897,10 +1189,10 @@
       container.className = "space-y-3";
       data.pairs.forEach((p) => {
         const row = document.createElement('div');
-        row.className = "p-3 rounded-xl border bg-slate-50 flex flex-col sm:flex-row justify-between gap-3 text-xs";
+        row.className = "p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/40 flex flex-col sm:flex-row justify-between gap-3 text-xs";
         row.innerHTML = `
-          <p class="text-slate-700 italic flex-1">"${p.sentence}"</p>
-          <select id="fig_${p.id}" class="p-2 rounded border bg-white text-xs font-semibold">
+          <p class="text-slate-700 dark:text-slate-200 italic flex-1">"${p.sentence}"</p>
+          <select id="fig_${p.id}" class="p-2 rounded border bg-white dark:bg-slate-700 text-xs font-semibold">
             <option value="">-- Majas --</option>
             ${data.figureOptions.map(f => `<option value="${f}">${f}</option>`).join('')}
           </select>
@@ -914,9 +1206,9 @@
       const container = document.createElement('div');
       container.className = "space-y-3";
       container.innerHTML = `
-        <label class="block text-xs font-bold text-slate-700">Tuliskan Lembar Analisis Kritis Anda di Bawah Ini:</label>
-        <textarea id="essayInput" rows="5" placeholder="Tuliskan analisis minimal 2-3 kalimat logis..." class="w-full p-3 rounded-xl border border-slate-300 text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
-        <div class="text-[11px] text-slate-500 bg-amber-50 p-2.5 rounded-lg border border-amber-200">
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-200">Tuliskan Lembar Analisis Kritis Anda di Bawah Ini:</label>
+        <textarea id="essayInput" rows="5" placeholder="Tuliskan analisis minimal 2-3 kalimat logis..." class="w-full p-3 rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-white text-xs sm:text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+        <div class="text-[11px] text-slate-500 dark:text-slate-400 bg-amber-50 dark:bg-amber-950/30 p-2.5 rounded-lg border border-amber-200 dark:border-amber-800">
           <strong>Petunjuk Evaluasi:</strong> Jawaban analitis Anda harus menyajikan argumen yang menyertakan istilah terminologi kebahasaan yang relevan.
         </div>
       `;
@@ -1018,18 +1310,19 @@
 
       renderLevelBubbles();
       updateScoreBadge();
+      saveStateToLocal();
     }
 
     function showFeedback(isSuccess, message, isForced = false) {
       feedbackPanel.classList.remove('hidden');
       if (isSuccess) {
-        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm bg-emerald-50 text-emerald-800 border border-emerald-200";
+        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-200 border border-emerald-200 dark:border-emerald-800";
         feedbackAlert.innerHTML = `<div><strong>Analisis Tepat!</strong><br>${message}</div>`;
       } else if (isForced) {
-        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm bg-rose-50 text-rose-800 border border-rose-200";
+        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-200 border border-rose-200 dark:border-rose-800";
         feedbackAlert.innerHTML = `<div><strong>Peluang Habis:</strong><br>${message}</div>`;
       } else {
-        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm bg-amber-50 text-amber-800 border border-amber-200";
+        feedbackAlert.className = "rounded-xl p-4 text-xs sm:text-sm bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 border border-amber-200 dark:border-amber-800";
         feedbackAlert.innerHTML = `<div><strong>Periksa Kembali:</strong><br>${message}</div>`;
       }
     }
@@ -1067,9 +1360,114 @@
           <td class="p-2.5 font-semibold">Lvl ${idx + 1}: ${lvl.title}</td>
           <td class="p-2.5 text-slate-500">${lvl.genre}</td>
           <td class="p-2.5 text-center">${State.levelAttempts[idx] || 0}x</td>
-          <td class="p-2.5 text-right font-bold ${sc > 0 ? 'text-indigo-700' : 'text-slate-400'}">${sc} Poin</td>
+          <td class="p-2.5 text-right font-bold ${sc > 0 ? 'text-indigo-700 dark:text-indigo-300' : 'text-slate-400'}">${sc} Poin</td>
         `;
         tbody.appendChild(tr);
+      });
+
+      // Modul 8: Generate Verification QR Code
+      document.getElementById('qrcodeContainer').innerHTML = "";
+      new QRCode(document.getElementById('qrcodeContainer'), {
+        text: `LENTERA-BINDO-IX|NAME:${State.student.name}|SCORE:${totalScore}|VERIFIED`,
+        width: 80,
+        height: 80
+      });
+
+      // Save to local leaderboard
+      saveToLeaderboard(State.student.name, State.student.class, totalScore);
+    }
+
+    /* ========================================================
+     * MODUL 5: LEADERBOARD SYSTEM
+     * ======================================================== */
+    function saveToLeaderboard(name, cls, score) {
+      let lb = JSON.parse(localStorage.getItem('lentera_bindo_ix_lb') || '[]');
+      lb.push({ name, class: cls, score, date: new Date().toLocaleDateString() });
+      lb.sort((a,b) => b.score - a.score);
+      lb = lb.slice(0, 10); // Keep Top 10
+      localStorage.setItem('lentera_bindo_ix_lb', JSON.stringify(lb));
+      State.leaderboard = lb;
+    }
+
+    /* ========================================================
+     * MODUL 4: DASHBOARD ANALITIK GURU
+     * ======================================================== */
+    function openTeacherDashboard() {
+      const lb = JSON.parse(localStorage.getItem('lentera_bindo_ix_lb') || '[]');
+      const tbody = document.getElementById('leaderboardBody');
+      tbody.innerHTML = "";
+      if (lb.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400">Belum ada data pengerjaan tersimpan.</td></tr>`;
+      } else {
+        lb.forEach((row, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td class="p-2 font-bold">#${i+1}</td>
+            <td class="p-2">${row.name}</td>
+            <td class="p-2">${row.class}</td>
+            <td class="p-2 text-right font-bold text-indigo-600">${row.score} Poin</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+      modalTeacherDashboard.classList.remove('hidden');
+    }
+
+    /* ========================================================
+     * MODUL 1: EXPORT / IMPORT SOAL JSON
+     * ======================================================== */
+    function exportQuestionsJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(QUIZ_LEVELS, null, 2));
+      const dlAnchor = document.createElement('a');
+      dlAnchor.setAttribute("href", dataStr);
+      dlAnchor.setAttribute("download", "Bank_Soal_Lentera_Bahasa_IX.json");
+      document.body.appendChild(dlAnchor);
+      dlAnchor.click();
+      dlAnchor.remove();
+    }
+
+    function importQuestionsJSON(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const imported = JSON.parse(evt.target.result);
+          if (Array.isArray(imported) && imported.length > 0) {
+            QUIZ_LEVELS = imported;
+            alert("Bank soal berhasil diperbarui!");
+            location.reload();
+          }
+        } catch(err) {
+          alert("Gagal mengimpor file JSON. Format tidak valid.");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    /* EXCEL REKAPITULASI KELAS EXPORT */
+    function exportClassExcel() {
+      const lb = JSON.parse(localStorage.getItem('lentera_bindo_ix_lb') || '[]');
+      if (lb.length === 0) {
+        alert("Belum ada data nilai tersimpan untuk diekspor!");
+        return;
+      }
+      const ws = XLSX.utils.json_to_sheet(lb);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "RekapNilaiKelasIX");
+      XLSX.writeFile(wb, "Rekap_Nilai_Lentera_Bahasa_IX.xlsx");
+    }
+
+    /* ========================================================
+     * MODUL 10: SCREENSHOT AUTO-CAPTURE (PNG GENERATOR)
+     * ======================================================== */
+    function downloadReportPNG() {
+      const printArea = document.getElementById('printArea');
+      html2canvas(printArea, { scale: 2 }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `Laporan_Asesmen_${State.student.name || 'Siswa'}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
       });
     }
   </script>
