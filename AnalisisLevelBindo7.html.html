@@ -1822,86 +1822,88 @@
       });
     }
   </script>
+ <!-- ======================================================== -->
+  <!-- MODUL OTOMATISASI REKAPITULASI GOOGLE SPREADSHEET       -->
   <!-- ======================================================== -->
-<!-- MODUL OTOMATISASI REKAPITULASI GOOGLE SPREADSHEET       -->
-<!-- ======================================================== -->
-<script>
-(function() {
-  // 1. ISIKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI SINI
-  const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbx...SESUAIKAN_URL_ANDA.../exec";
+  <script>
+  (function() {
+    // 1. URL WEB APP APPS SCRIPT (SUDAH TERPASANG)
+    const GOOGLE_WEB_APP_URL = "https://script.google.com/macros/s/AKfycby87XBZQIerpAJA4Sc7DSIXb_Z3QshGtIDJT66Vl7VDZHDHx9d5uGstoRDt996quTyW/exec";
 
-  // 2. Fungsi Pengirim Data ke API Google Web App
-  function sendDataToGoogleSheets(payload) {
-    if (!GOOGLE_WEB_APP_URL || GOOGLE_WEB_APP_URL.includes("SESUAIKAN_URL_ANDA")) {
-      console.warn("[Lentera Pro] Google Web App URL belum dikonfigurasi.");
-      return;
+    // 2. Fungsi Pengirim Data ke API Google Web App
+    function sendDataToGoogleSheets(payload) {
+      if (!GOOGLE_WEB_APP_URL || GOOGLE_WEB_APP_URL.includes("SESUAIKAN_URL_ANDA")) {
+        console.warn("[Lentera Pro] Google Web App URL belum dikonfigurasi.");
+        return;
+      }
+
+      fetch(GOOGLE_WEB_APP_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+      .then(() => {
+        console.log("[Lentera Pro] Berhasil terkirim ke Google Sheets.");
+      })
+      .catch((err) => {
+        console.error("[Lentera Pro] Gagal mengirim data ke Google Sheets:", err);
+      });
     }
 
-    fetch(GOOGLE_WEB_APP_URL, {
-      method: "POST",
-      mode: "no-cors",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    })
-    .then(() => {
-      console.log("[Lentera Pro] Berhasil terkirim ke Google Sheets.");
-    })
-    .catch((err) => {
-      console.error("[Lentera Pro] Gagal mengirim data ke Google Sheets:", err);
+    // 3. Interseptor Otomatis (Hook) ke Fungsi finishQuiz
+    window.addEventListener('load', function() {
+      if (typeof window.finishQuiz === 'function') {
+        const originalFinishQuiz = window.finishQuiz;
+
+        window.finishQuiz = function() {
+          // Jalankan fungsi asli bawaan aplikasi terlebih dahulu
+          originalFinishQuiz.apply(this, arguments);
+
+          // Ekstraksi data hasil dari State global
+          try {
+            const studentName = (window.State && window.State.student) ? window.State.student.name : "-";
+            const studentClass = (window.State && window.State.student) ? window.State.student.class : "-";
+            const studentAbsen = (window.State && window.State.student) ? window.State.student.absen : "-";
+            
+            const scoresArray = (window.State && window.State.scores) ? window.State.scores : [];
+            const totalScore = scoresArray.reduce((a, b) => a + b, 0);
+
+            const levelStatusArray = (window.State && window.State.levelStatus) ? window.State.levelStatus : [];
+            const clearedCount = levelStatusArray.filter(s => s === 'cleared').length;
+
+            const timeElapsed = (window.State && window.State.timeElapsedSeconds) ? window.State.timeElapsedSeconds : 0;
+            const formattedTime = `${Math.floor(timeElapsed / 60)}m ${timeElapsed % 60}s`;
+
+            let predikat = "Perlu Bimbingan";
+            if (totalScore >= 170) predikat = "Sangat Kritis / Istimewa";
+            else if (totalScore >= 140) predikat = "Mahir Bernalar";
+            else if (totalScore >= 110) predikat = "Cakap";
+
+            const payload = {
+              timestamp: new Date().toLocaleString("id-ID"),
+              name: studentName,
+              class: studentClass,
+              absen: studentAbsen,
+              score: totalScore,
+              cleared: `${clearedCount}/20`,
+              timeSpent: formattedTime,
+              grade: predikat
+            };
+
+            // Kirim payload data ke Google Sheets
+            sendDataToGoogleSheets(payload);
+          } catch (err) {
+            console.error("[Lentera Pro] Error saat mengekstraksi data hasil:", err);
+          }
+        };
+      }
     });
-  }
-
-  // 3. Interseptor Otomatis (Hook) ke Fungsi finishQuiz
-  window.addEventListener('load', function() {
-    if (typeof window.finishQuiz === 'function') {
-      const originalFinishQuiz = window.finishQuiz;
-
-      window.finishQuiz = function() {
-        // Jalankan fungsi asli bawaan aplikasi terlebih dahulu
-        originalFinishQuiz.apply(this, arguments);
-
-        // Ekstraksi data dari State global
-        try {
-          const studentName = (window.State && window.State.student) ? window.State.student.name : "-";
-          const studentClass = (window.State && window.State.student) ? window.State.student.class : "-";
-          const studentAbsen = (window.State && window.State.student) ? window.State.student.absen : "-";
-          
-          const scoresArray = (window.State && window.State.scores) ? window.State.scores : [];
-          const totalScore = scoresArray.reduce((a, b) => a + b, 0);
-
-          const levelStatusArray = (window.State && window.State.levelStatus) ? window.State.levelStatus : [];
-          const clearedCount = levelStatusArray.filter(s => s === 'cleared').length;
-
-          const timeElapsed = (window.State && window.State.timeElapsedSeconds) ? window.State.timeElapsedSeconds : 0;
-          const formattedTime = `${Math.floor(timeElapsed / 60)}m ${timeElapsed % 60}s`;
-
-          let predikat = "Perlu Bimbingan";
-          if (totalScore >= 170) predikat = "Sangat Kritis / Istimewa";
-          else if (totalScore >= 140) predikat = "Mahir Bernalar";
-          else if (totalScore >= 110) predikat = "Cakap";
-
-          const payload = {
-            timestamp: new Date().toLocaleString("id-ID"),
-            name: studentName,
-            class: studentClass,
-            absen: studentAbsen,
-            score: totalScore,
-            cleared: `${clearedCount}/20`,
-            timeSpent: formattedTime,
-            grade: predikat
-          };
-
-          // Kirim payload data ke Google Sheets
-          sendDataToGoogleSheets(payload);
-        } catch (err) {
-          console.error("[Lentera Pro] Error saat mengekstraksi data hasil:", err);
-        }
-      };
-    }
-  });
-})();
-</script>
+  })();
+  </script>
+</body>
+</html>
 </body>
 </html>
